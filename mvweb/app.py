@@ -210,7 +210,7 @@ def search():
                                     LIMIT 100
                                   '''), params=params)
 
-    return render_template('search.html', kms=kms)
+    return render_template('search.html', kms=kms.all())
     
 @app.before_first_request
 def database_tweak():
