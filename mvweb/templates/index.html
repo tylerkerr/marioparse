@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-<form action="/search" class="filters" method="GET" autocomplete="off">
+<form action="/search" class="filters skipEmptyFields" method="GET" autocomplete="off">
     <div class="filterrow">
         <div class="filter">
             <input type="text" name="report_id" placeholder="Killmail ID" value="{{ request.args.get('report_id')  or '' }}" />
