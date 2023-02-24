@@ -82,7 +82,7 @@
         <td><a href="/search?killer_corp={{ km['killer_corp'] }}" class="tablelink">{{ '' if not km['killer_corp'] else km['killer_corp'] }}</a></td>
         <td><a href="/search?killer_name={{ km['killer_name'] }}" class="tablelink">{{ '' if not km['killer_name'] else km['killer_name'] }}</a></td>
         <td><a href="/search?killer_ship_type={{ km['killer_ship_type'] }}" class="tablelink">{{ '' if not km['killer_ship_type'] else km['killer_ship_type'] }}</a></td>
-        <td><a href="/search?killer_ship_category={{ km['killer_ship_category'] }}"><img src="/static/img/shipclass/{{ km['killer_ship_category'] }}.png"></a></td>
+        <td><a href="/search?killer_ship_category={{ km['killer_ship_category'] }}"><img src="/static/img/shipclass/{{ km['killer_ship_category']|lower }}.png"></a></td>
         <td><a href="/search?victim_corp={{ km['victim_corp'] }}" class="tablelink">{{ '' if not km['victim_corp'] else km['victim_corp'] }}</a></td>
         <td><a href="/search?victim_name={{ km['victim_name'] }}" class="tablelink">{{ '' if not km['victim_name'] else km['victim_name'] }}</a></td>
         <td><a href="/search?victim_ship_type={{ km['victim_ship_type'] }}" class="tablelink">{{ '' if not km['victim_ship_type'] else  km['victim_ship_type'] }}</a></td>
