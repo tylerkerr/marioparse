@@ -126,7 +126,7 @@ def positivity():
 
     sorted_score = dict(sorted(score.items(), key=lambda item: item[1], reverse=True))
 
-    return render_template('positivity.html', score=sorted_score)
+    return render_template('positivity.html', title="positivity", score=sorted_score)
 
 
 
@@ -141,7 +141,7 @@ def bullying():
                                         LIMIT 500
     '''))
 
-    return render_template('bullying.html', bullies=bullies)
+    return render_template('bullying.html', title="bullying olympics", bullies=bullies)
 
 @app.route('/search', methods=['GET'])
 def search():
@@ -210,7 +210,7 @@ def search():
                                     LIMIT 100
                                   '''), params=params)
 
-    return render_template('search.html', kms=kms.all())
+    return render_template('search.html', title="killmail search", kms=kms.all())
     
 @app.before_first_request
 def database_tweak():
