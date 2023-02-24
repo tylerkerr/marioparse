@@ -1,4 +1,4 @@
-window.addEventListener('load', function() {
+window.addEventListener('DOMContentLoaded', function() {
     let forms = document.getElementsByClassName('skipEmptyFields');
     for (let form of forms) {
       form.addEventListener('formdata', function(event) {
