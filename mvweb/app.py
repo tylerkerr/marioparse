@@ -2,13 +2,13 @@ from os import environ, path
 from flask import Flask, Blueprint, render_template, request, url_for, redirect, g
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func, text
-# from km_db import close_connection
 from werkzeug.exceptions import HTTPException, InternalServerError, BadRequest
 from werkzeug.middleware.proxy_fix import ProxyFix
-# from views import routes
+from dateutil import parser
 from glob import glob
 from hashlib import md5
 from re import sub
+from datetime import datetime, timezone
 import logging
 import base64
 import time
@@ -89,7 +89,21 @@ routes = Blueprint('views', __name__)
 
 @routes.route('/')
 def index():
-    return render_template('index.html')
+    latest = db.session.execute(text('''
+                                    SELECT * FROM Killmails
+                                    ORDER BY timestamp DESC
+                                    LIMIT 50
+                                  '''))
+
+    update_time = db.session.execute(text('''SELECT last_refreshed 
+                                                  FROM Months
+                                                  ORDER BY month DESC
+                                                  LIMIT 1''')).all()[0][0]
+
+    update_seconds_old = (datetime.now(timezone.utc) - parser.isoparse(update_time)).total_seconds()
+    update_minutes_old = int(divmod(update_seconds_old , 60)[0])
+    
+    return render_template('index.html', kms=latest.all(), update_age_minutes=update_minutes_old)
 
 
 @app.before_request
@@ -207,7 +221,7 @@ def search():
                                     (:killer_ship_category IS NULL OR killer_ship_category LIKE :killer_ship_category) AND
                                     (:timestamp IS NULL OR timestamp LIKE :timestamp)
                                     ORDER BY isk DESC
-                                    LIMIT 8192
+                                    LIMIT 5000
                                   '''), params=params)
 
     return render_template('search.html', title="killmail search", kms=kms.all())
