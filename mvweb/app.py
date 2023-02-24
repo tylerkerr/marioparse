@@ -142,17 +142,17 @@ def search():
     killer_corp = '%' + sub('\*', '%', request.args['killer_corp']) if 'killer_corp' in request.args else None
     killer_name = '%' + sub('\*', '%', request.args['killer_name']) if 'killer_name' in request.args and request.args['killer_name'] else None
     minimum_isk = request.args['isk'] if 'isk' in request.args and request.args['isk'] else None
-    victim_ship_type = '%' + sub('\*', '%', request.args['victim_ship_type']) if 'victim_ship_type' in request.args else None
-    victim_ship_category = '%' + sub('\*', '%', request.args['victim_ship_category']) if 'victim_ship_category' in request.args else None
-    victim_name = '%' + sub('\*', '%', request.args['victim_name']) if 'victim_name' in request.args else None
-    victim_corp = '%' + sub('\*', '%', request.args['victim_corp']) if 'victim_corp' in request.args else None
-    system = '%' + sub('\*', '%', request.args['system']) if 'system' in request.args else None
-    constellation = '%' + sub('\*', '%', request.args['constellation']) if 'constellation' in request.args else None
-    region = '%' + sub('\*', '%', request.args['region']) if 'region' in request.args else None
+    victim_ship_type = '%' + sub('\*', '%', request.args['victim_ship_type']) if 'victim_ship_type' in request.args and request.args['victim_ship_type'] else None
+    victim_ship_category = '%' + sub('\*', '%', request.args['victim_ship_category']) if 'victim_ship_category' in request.args and request.args['victim_ship_category'] else None
+    victim_name = '%' + sub('\*', '%', request.args['victim_name']) if 'victim_name' in request.args and request.args['victim_name'] else None
+    victim_corp = '%' + sub('\*', '%', request.args['victim_corp']) if 'victim_corp' in request.args and request.args['victim_corp'] else None
+    system = '%' + sub('\*', '%', request.args['system']) if 'system' in request.args and request.args['system'] else None
+    constellation = '%' + sub('\*', '%', request.args['constellation']) if 'constellation' in request.args and request.args['constellation'] else None
+    region = '%' + sub('\*', '%', request.args['region']) if 'region' in request.args and request.args['region'] else None
     victim_total_damage_received = request.args['victim_total_damage_received'] if 'victim_total_damage_received' in request.args else None
     max_total_participants = request.args['total_participants'] if 'total_participants' in request.args else None
-    killer_ship_type = '%' + sub('\*', '%', request.args['killer_ship_type']) if 'killer_ship_type' in request.args else None
-    killer_ship_category = '%' + sub('\*', '%', request.args['killer_ship_category']) if 'killer_ship_category' in request.args else None
+    killer_ship_type = '%' + sub('\*', '%', request.args['killer_ship_type']) if 'killer_ship_type' in request.args and request.args['killer_ship_type'] else None
+    killer_ship_category = '%' + sub('\*', '%', request.args['killer_ship_category']) if 'killer_ship_category' in request.args and request.args['killer_ship_category'] else None
     timestamp = request.args['timestamp'] if 'timestamp' in request.args else None
     
     params = {
