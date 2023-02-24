@@ -207,7 +207,7 @@ def search():
                                     (:killer_ship_category IS NULL OR killer_ship_category LIKE :killer_ship_category) AND
                                     (:timestamp IS NULL OR timestamp LIKE :timestamp)
                                     ORDER BY isk DESC
-                                    LIMIT 100
+                                    LIMIT 8192
                                   '''), params=params)
 
     return render_template('search.html', title="killmail search", kms=kms.all())
