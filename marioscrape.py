@@ -148,9 +148,9 @@ def is_month_current(month_iso):
     difference = now - status
     data_age_hours = difference.seconds / 60 / 24
     if is_this_month(month_iso):
-        limit = 2
+        limit = 1
     else:
-        limit = 168
+        limit = 48
     if data_age_hours <= limit:
         print(f"[+] month {month_iso} is {data_age_hours} hours old, current")
         return True
