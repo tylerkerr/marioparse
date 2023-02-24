@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block content %}
+<script>
+    (() => {
+        document.addEventListener("DOMContentLoaded", () => {
+            new Tablesort(document.getElementById('resultstable'), { descending: true });
+        });
+    })();
+</script>
+<p>results</p>
+<table class="sortable" id="resultstable">
+    <thead>
+        <tr>
+            <th>Killer corp</th>
+            <th>Killer</th>
+            <th>Killer ship</th>
+            <th>Killer ship class</th>
+            <th>Victim corp</th>
+            <th>Victim ship</th>
+            <th>Victim ship class</th>
+            <th>System</th>
+            <th>Constellation</th>
+            <th>Region</th>
+            <th>Isk</th>
+            <th>Damage</th>
+            <th>Participants</th>
+            <th>Date</th>
+            <th>Image</th>
+        </tr>
+    </thead>
+
+{% for km in kms %}
+    <tr>
+        <td>{{ km['killer_corp'] }}</td>
+        <td>{{ km['killer_name'] }}</td>
+        <td>{{ km['killer_ship_type'] }}</td>
+        <td>{{ km['killer_ship_category'] }}</td>
+        <td>{{ km['victim_corp'] }}</td>
+        <td>{{ km['victim_ship_type'] }}</td>
+        <td>{{ km['victim_ship_category'] }}</td>
+        <td>{{ km['system'] }}</td>
+        <td>{{ km['constellation'] }}</td>
+        <td>{{ km['region'] }}</td>
+        <td>{{ "{:,}".format(km['isk']) }}</td>
+        <td>{{ km['victim_total_damage_received'] }}</td>
+        <td>{{ km['total_participants'] }}</td>
+        <td>{{ km['date_killed'] }}</td>
+        <td><a href="{{ km['image_url'] }}" target="_blank"><img src="{{ km['image_url'] }}" class="km_img_small"></a></td>
+    </tr>
+{% endfor %}
+</table>
+{% endblock %}

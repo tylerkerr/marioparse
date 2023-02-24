@@ -1,0 +1,23 @@
+# Python virtual environment
+env/
+
+# Python compiled/cache
+__pycache__/
+*.pyc
+
+# Gunicorn Unix socket 
+mvweb.sock
+
+# Editors
+.vscode
+.idea
+
+# OS cache
+.DS_Store
+
+# Config
+mvweb/app.cfg
+
+# Content
+km.db
+km.db-journal

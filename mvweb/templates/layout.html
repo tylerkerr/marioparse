@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - marioparse</title>
+    <link rel="stylesheet" type="text/css" href="/static/style/mv.css?h={{ config['STATIC_HASH'] }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
+    <link rel="shortcut icon" href="/static/images/favicon.ico">
+</head>
+<body>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    <script src="/static/script/perch.js?h={{ config['STATIC_HASH'] }}"></script>
+    <script src="/static/script/tablesort.js?h={{ config['STATIC_HASH'] }}"></script>
+    <script src="/static/script/tablesort.number.min.js?h={{ config['STATIC_HASH'] }}"></script>
+    <p class="footer">Rendered in {{ g.request_time() }}</p>
+</body>

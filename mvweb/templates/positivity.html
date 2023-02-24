@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block content %}
+<p>lol</p>
+{% set count = namespace(value=1) %}
+<table>
+    <tr>
+        <th>place</th>
+        <th>corp</th>
+        <th>isk total</th>
+    </tr>
+{% for corp in score %}
+    <tr>
+        <td>{{ count.value }}</td>
+        <td>{{ corp }}</td>
+        <td>{{ "{:,}".format(score[corp]) }}</td>
+    </tr>
+    {% set count.value = count.value + 1 %}
+{% endfor %}
+</table>
+{% endblock %}
