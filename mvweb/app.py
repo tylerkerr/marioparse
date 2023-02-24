@@ -130,6 +130,19 @@ def positivity():
 
 
 
+@app.route('/bullying')
+def bullying():
+    bullies = db.session.execute(text('''
+                                        SELECT killer_corp, victim_corp, sum(isk)
+                                        FROM Killmails
+                                        WHERE killer_corp not null AND victim_corp not null
+                                        GROUP BY killer_corp, victim_corp
+                                        ORDER BY sum(isk) desc
+                                        LIMIT 500
+    '''))
+
+    return render_template('bullying.html', bullies=bullies)
+
 @app.route('/search', methods=['GET'])
 def search():
     valid_columns = [c[1] for c in db.session.execute(text('pragma table_info(Killmails)'))]

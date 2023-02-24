@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+{% set count = namespace(value=1) %}
+<table>
+    <tr>
+        <th>place</th>
+        <th>bullying corp</th>
+        <th>owned corp</th>
+        <th>isk total</th>
+    </tr>
+{% for pair in bullies %}
+    <tr>
+        <td>{{ count.value }}</td>
+        <td>{{ pair[0] }}</td>
+        <td>{{ pair[1] }}</td>
+        <td>{{ "{:,}".format(pair[2]) }}</td>
+    </tr>
+    {% set count.value = count.value + 1 %}
+{% endfor %}
+</table>
+{% endblock %}
