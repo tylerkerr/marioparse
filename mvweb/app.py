@@ -120,16 +120,13 @@ def positivity():
                                         GROUP BY killer_corp
                                         ORDER BY sum(isk)
     '''))
-
     corps_neg = db.session.execute(text('''
                                         SELECT victim_corp, sum(isk)
                                         FROM Killmails
                                         GROUP BY victim_corp
                                         ORDER BY sum(isk)
     '''))
-
     score = {}
-
     for corp in corps_poz:
         score[corp[0]] = corp[1]
     for corp in corps_neg:
@@ -137,9 +134,7 @@ def positivity():
             score[corp[0]] = corp[1] * -1
         else:
             score[corp[0]] = score[corp[0]] - corp[1]
-
     sorted_score = dict(sorted(score.items(), key=lambda item: item[1], reverse=True))
-
     return render_template('positivity.html', title="positivity", score=sorted_score)
 
 

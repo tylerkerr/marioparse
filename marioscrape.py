@@ -37,7 +37,9 @@ sample killmail object:
 
 # constants
 
-db_name = 'km.db'
+this_path = os.path.dirname(os.path.abspath(__file__))
+db_filename = 'km.db'
+db_name = this_path + '/' + db_filename
 baseurl = 'https://echoes.mobi/killboard/export'
 headers = {
     'User-Agent': 'honk-mariobot-parse/0.1 (bearand#4133@discord)'
