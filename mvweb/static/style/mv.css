@@ -8,10 +8,37 @@ body {
     text-align: center;
     font-size: 8px;
     margin: 0;
+    padding-top: 10px;
+}
+
+.mobilesizewarning {
+    border-top: 40px;
+    padding-bottom: 40px;
+    font-size: 32px;
+    font-weight: bold;
+    color: darkred;
+    display: inline;
+}
+
+@media (min-width: 600px) {
+    .mobilesizewarning {
+        display: none;
+    }
 }
 
 .km_img_small {
-    width: 100px;
+    width: 100%;
+}
+
+@media (min-width: 1200px) {
+    .km_img_small { 
+        width: 100px;
+        height: 56px;
+    }
+}
+
+.smallicon {
+    width: 16px;
 }
 
 .sortable {
@@ -20,10 +47,28 @@ body {
     width: 100%;
 }
 
+.nowrapname {
+    white-space: nowrap;
+}
+
+.hideonmobile {
+    display: none;
+}
+
+@media (min-width: 1200px) {
+    .hideonmobile {
+        display: table-cell;
+    }
+}
+
 table {
     border-collapse: collapse;
     margin-bottom: 0px;
     table-layout: fixed;
+}
+
+.paddingtable td {
+    padding: 8px;
 }
 
 th {
@@ -49,10 +94,12 @@ tr:nth-child(even) {
 }
 
 td {
+    position: relative;
     border-bottom: none;
-    padding: 8px;
+    padding: 0px;
     text-align: center;
-    font-size:12px;
+    font-size: 12px;
+    min-height: 16px;
 }
 
 th[role=columnheader]:not(.no-sort) {
@@ -75,21 +122,35 @@ th[aria-sort=ascending]:not(.no-sort):after {
     border-width: 0 4px 4px;
 }
 
+th[aria-sort]:not(.no-sort):after {
+    visibility: visible;
+    opacity: 0.4;
+}
+
+th[role=columnheader]:not(.no-sort):hover:after {
+    visibility: visible;
+    opacity: 1;
+}
+
 form.filters{ 
-    border-left:1px solid black;
-    display:flex;
     margin-bottom: 0;
 }
+
+@media (min-width: 600px) {
+    form.filters{ 
+        display: flex;
+    }
+}
+
 
 .filterrow {
     display: block;
     flex-direction: row;
 }
 
+
+
 .filter {
-    border-right:1px solid black;
-    justify-items: center;
-    justify-content: center;
     align-items:center;
     flex-direction: row;
     display: flex;
@@ -98,8 +159,22 @@ form.filters{
     text-align:center;
 }
 
+@media (min-width: 600px) {
+    .filter {
+        justify-items: center;
+        justify-content: center;
+        align-items:center;
+        flex-direction: row;
+        display: flex;
+        flex: 1;
+        padding: 2px;
+        text-align:center;
+    }
+}
+
 .searchbutton {
-    padding: 3%;
+    padding-top: 2%;
+    padding-left: 2%;
 }
 
 .tablelink {

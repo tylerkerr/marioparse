@@ -103,7 +103,7 @@ def index():
     update_seconds_old = (datetime.now(timezone.utc) - parser.isoparse(update_time)).total_seconds()
     update_minutes_old = int(divmod(update_seconds_old , 60)[0])
     
-    return render_template('index.html', kms=latest.all(), update_age_minutes=update_minutes_old)
+    return render_template('index.html', kms=latest.all(), update_age_minutes=update_minutes_old, title="latest")
 
 
 @app.before_request
@@ -216,10 +216,12 @@ def search():
                                     (:killer_ship_category IS NULL OR killer_ship_category LIKE :killer_ship_category) AND
                                     (:timestamp IS NULL OR timestamp LIKE :timestamp)
                                     ORDER BY isk DESC
-                                    LIMIT 5000
+                                    LIMIT 10000
                                   '''), params=params)
 
-    return render_template('search.html', title="killmail search", kms=kms.all())
+    killmails = kms.all()
+    isk_total = sum(km._mapping['isk'] for km in killmails)
+    return render_template('search.html', title="killmail search", kms=killmails, isk_total=isk_total)
     
 @app.before_first_request
 def database_tweak():
