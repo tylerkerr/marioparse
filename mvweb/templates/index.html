@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-<form action="/search" class="filters skipEmptyFields" method="GET" autocomplete="off">
+<form class="filters skipEmptyFields" method="GET" autocomplete="off">
     <div class="filterrow">
         <div class="filter">
             <input type="text" name="killer_corp" placeholder="Killer corp" value="{{ request.args.get('killer_corp')  or '' }}" />
@@ -49,7 +49,11 @@
     </div>
 
     <div class="searchbutton">
-        <input type="submit" value="Search" />
+        <!-- <input type="submit" value="Search" /> -->
+        <button type="submit" formaction="/search">Search</button>
+    </div>
+    <div class="searchbutton">
+        <button type="submit" formaction="/leaderboard">Leaderboard</button>
     </div>
 </form>
 <p class="mobilesizewarning">

@@ -54,7 +54,6 @@
             <input type="text" name="report_id" placeholder="Killmail ID" value="{{ request.args.get('report_id')  or '' }}" />
         </div>
     </div>
-
     <div class="searchbutton">
         <!-- <input type="submit" value="Search" /> -->
         <button type="submit" formaction="/search">Search</button>
@@ -67,47 +66,47 @@
     your device is small<br />
     turn it sideways..sorry<br />
 </p>
-<p>{{ kms|length }} killmails for {{ "{:,}".format(isk_total) }} total isk</p>
+<p>{{ kms|length }} killers</p>
 <table class="sortable killtable" id="resultstable">
     <thead>
         <tr>
-            <th role="columnheader" data-sort-method='default'>K. corp</th>
+            {% if request.args.get('killer_corp') %}<th role="columnheader" data-sort-method='default'>K. corp</th>{% endif %}
             <th role="columnheader">Killer</th>
-            <th class="hideonmobile" role="columnheader">K. ship</th>
-            <th class="hideonmobile" role="columnheader" data-sort-method='default'>K. class</th>
-            <th role="columnheader">V. corp</th>
-            <th role="columnheader">Victim</th>
-            <th role="columnheader">V. ship</th>
-            <th class="hideonmobile" role="columnheader">V. class</th>
-            <th class="hideonmobile" role="columnheader">System</th>
+            {% if request.args.get('killer_ship_type') %}<th class="hideonmobile" role="columnheader">K. ship</th>{% endif %}
+            {% if request.args.get('killer_ship_category') %}<th class="hideonmobile" role="columnheader" data-sort-method='default'>K. class</th>{% endif %}
+            {% if request.args.get('victim_corp') %}<th role="columnheader">V. corp</th>{% endif %}
+            {% if request.args.get('victim_name') %}<th role="columnheader">Victim</th>{% endif %}
+            {% if request.args.get('victim_ship_type') %}<th role="columnheader">V. ship</th>{% endif %}
+            {% if request.args.get('victim_ship_category') %}<th class="hideonmobile" role="columnheader">V. class</th>{% endif %}
+            {% if request.args.get('system') %}<th class="hideonmobile" role="columnheader">System</th>{% endif %}
             <!-- <th role="columnheader">Constellation</th> -->
-            <th role="columnheader">Region</th>
-            <th data-sort-default role="columnheader">Isk</th>
+            {% if request.args.get('region') %}<th role="columnheader">Region</th>{% endif %}
+            <th data-sort-default role="columnheader">Total Isk</th>
             <!-- <th role="columnheader">Damage</th> -->
             <!-- <th role="columnheader">Participants</th> -->
-            <th role="columnheader" data-sort-method='date'>Date</th>
-            <th role="columnheader" data-sort-method='none'>Killmail</th>
+            <!-- <th role="columnheader" data-sort-method='date'>Date</th> -->
+            <th role="columnheader" data-sort-method='none'>Search</th>
         </tr>
     </thead>
     
 {% for km in kms %}
     <tr>
-        <td><a href="/search?killer_corp={{ km['killer_corp'] }}" class="tablelink">{{ '' if not km['killer_corp'] else km['killer_corp'] }}</a></td>
+        {% if request.args.get('killer_corp') %}<td><a href="/search?killer_corp={{ km['killer_corp'] }}" class="tablelink">{{ '' if not km['killer_corp'] else km['killer_corp'] }}</a></td>{% endif %}
         <td class="nowrapname">{% if km['killer_name'] %}<a href="https://echoes.mobi/killboard/view/player/{{ km['killer_name'] }}/summary" target="_blank"><img class='smallicon' src="/static/img/dogtags.png"></a>{% endif %}<a href="/search?killer_name={{ km['killer_name'] }}" class="tablelink">{{ '' if not km['killer_name'] else km['killer_name'] }}</a></td>
-        <td class="hideonmobile" ><a href="/search?killer_ship_type={{ km['killer_ship_type'] }}" class="tablelink">{{ '' if not km['killer_ship_type'] else km['killer_ship_type'] }}</a></td>
-        <td class="hideonmobile" ><a href="/search?killer_ship_category={{ km['killer_ship_category'] }}"><img src="/static/img/shipclass/{{ km['killer_ship_category']|lower }}.png"></a></td>
-        <td><a href="/search?victim_corp={{ km['victim_corp'] }}" class="tablelink">{{ '' if not km['victim_corp'] else km['victim_corp'] }}</a></td>
-        <td class="nowrapname">{% if km['victim_name'] %}<a href="https://echoes.mobi/killboard/view/player/{{ km['victim_name'] }}/summary" target="_blank"><img class='smallicon' src="/static/img/dogtags.png"></a>{% endif %}<a href="/search?victim_name={{ km['victim_name'] }}" class="tablelink">{{ '' if not km['victim_name'] else km['victim_name'] }}</a></td>
-        <td><a href="/search?victim_ship_type={{ km['victim_ship_type'] }}" class="tablelink">{{ '' if not km['victim_ship_type'] else  km['victim_ship_type'] }}</a></td>
-        <td class="hideonmobile" ><a href="/search?victim_ship_category={{ km['victim_ship_category'] }}" class="tablelink"><img src="/static/img/shipclass/{{ km['victim_ship_category']|lower }}.png"></a></td>
-        <td class="hideonmobile" ><a href="/search?system={{ km['system'] }}" class="tablelink">{{ '' if not km['system'] else km['system']}}</a></td>
+        {% if request.args.get('killer_ship_type') %}<td class="hideonmobile" ><a href="/search?killer_ship_type={{ km['killer_ship_type'] }}" class="tablelink">{{ '' if not km['killer_ship_type'] else km['killer_ship_type'] }}</a></td>{% endif %}
+        {% if request.args.get('killer_ship_category') %}<td class="hideonmobile" ><a href="/search?killer_ship_category={{ km['killer_ship_category'] }}"><img src="/static/img/shipclass/{{ km['killer_ship_category']|lower }}.png"></a></td>{% endif %}
+        {% if request.args.get('victim_corp') %}<td><a href="/search?victim_corp={{ km['victim_corp'] }}" class="tablelink">{{ '' if not km['victim_corp'] else km['victim_corp'] }}</a></td>{% endif %}
+        {% if request.args.get('victim_name') %}<td class="nowrapname">{% if km['victim_name'] %}<a href="https://echoes.mobi/killboard/view/player/{{ km['victim_name'] }}/summary" target="_blank"><img class='smallicon' src="/static/img/dogtags.png"></a>{% endif %}<a href="/search?victim_name={{ km['victim_name'] }}" class="tablelink">{{ '' if not km['victim_name'] else km['victim_name'] }}</a></td>{% endif %}
+        {% if request.args.get('victim_ship_type') %}<td><a href="/search?victim_ship_type={{ km['victim_ship_type'] }}" class="tablelink">{{ '' if not km['victim_ship_type'] else  km['victim_ship_type'] }}</a></td>{% endif %}
+        {% if request.args.get('victim_ship_category') %}<td class="hideonmobile" ><a href="/search?victim_ship_category={{ km['victim_ship_category'] }}" class="tablelink"><img src="/static/img/shipclass/{{ km['victim_ship_category']|lower }}.png"></a></td>{% endif %}
+        {% if request.args.get('system') %}<td class="hideonmobile" ><a href="/search?system={{ km['system'] }}" class="tablelink">{{ '' if not km['system'] else km['system']}}</a></td>{% endif %}
         <!-- <td>{{ km['constellation'] }}</td> -->
-        <td><a href="/search?region={{ km['region'] }}" class="tablelink">{{ '' if not km['region'] else km['region']}}</a></td>
-        <td>{{ "{:,}".format(km['isk']) }}</td>
+        {% if request.args.get('region') %}<td><a href="/search?region={{ km['region'] }}" class="tablelink">{{ '' if not km['region'] else km['region']}}</a></td>{% endif %}
+        <td>{{ "{:,}".format(km['SUM(ISK)']) }}</td>
         <!-- <td>{{ km['victim_total_damage_received'] }}</td> -->
         <!-- <td>{{ km['total_participants'] }}</td> -->
-        <td>{{ km['date_killed'] }}</td>
-        <td><a href="{{ km['image_url'] }}" target="_blank">{% if kms|length < 100 %}<img src="{{ km['image_url'] }}" class="km_img_small">{% else %}<img src="/static/img/killreport.png">{% endif %}</a></td>
+        <!-- <td>{{ km['date_killed'] }}</td> -->
+        <td><a href="/search?killer_name={{ km['killer_name'] }}&{{ url_params }}"><img src="/static/img/char-search.png"></a></td>
     </tr>
 {% endfor %}
 </table>
