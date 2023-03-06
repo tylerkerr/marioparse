@@ -269,7 +269,7 @@ def leaderboard():
               }
 
     kms = db.session.execute(text('''
-                                    SELECT *, SUM(ISK) FROM Killmails
+                                    SELECT *, COUNT(report_id), SUM(ISK) FROM Killmails
                                     WHERE
                                     (:report_id IS NULL OR report_id = :report_id) AND
                                     (:killer_corp IS NULL OR killer_corp LIKE :killer_corp) AND

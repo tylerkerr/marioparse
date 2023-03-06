@@ -83,6 +83,7 @@
             <!-- <th role="columnheader">Constellation</th> -->
             {% if request.args.get('region') %}<th role="columnheader">Region</th>{% endif %}
             <th data-sort-default role="columnheader">Total Isk</th>
+            <th role="columnheader">Total kills</th>
             <!-- <th role="columnheader">Damage</th> -->
             <!-- <th role="columnheader">Participants</th> -->
             <!-- <th role="columnheader" data-sort-method='date'>Date</th> -->
@@ -105,6 +106,7 @@
         <!-- <td>{{ km['constellation'] }}</td> -->
         {% if request.args.get('region') %}<td><a href="/search?region={{ km['region'] }}" class="tablelink">{{ '' if not km['region'] else km['region']}}</a></td>{% endif %}
         <td>{{ "{:,}".format(km['SUM(ISK)']) }}</td>
+        <td>{{ km['COUNT(report_id)'] }}</td>
         <!-- <td>{{ km['victim_total_damage_received'] }}</td> -->
         <!-- <td>{{ km['total_participants'] }}</td> -->
         <!-- <td>{{ km['date_killed'] }}</td> -->
