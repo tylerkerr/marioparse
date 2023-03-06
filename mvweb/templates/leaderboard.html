@@ -70,6 +70,7 @@
 <table class="sortable killtable" id="resultstable">
     <thead>
         <tr>
+            <th role="columnheader">Place</th>
             {% if request.args.get('killer_corp') %}<th role="columnheader" data-sort-method='default'>K. corp</th>{% endif %}
             <th role="columnheader">Killer</th>
             {% if request.args.get('killer_ship_type') %}<th class="hideonmobile" role="columnheader">K. ship</th>{% endif %}
@@ -88,9 +89,10 @@
             <th role="columnheader" data-sort-method='none'>Search</th>
         </tr>
     </thead>
-    
+{% set count = namespace(value=1) %}
 {% for km in kms %}
     <tr>
+        <td>{{ count.value }}</td>
         {% if request.args.get('killer_corp') %}<td><a href="/search?killer_corp={{ km['killer_corp'] }}" class="tablelink">{{ '' if not km['killer_corp'] else km['killer_corp'] }}</a></td>{% endif %}
         <td class="nowrapname">{% if km['killer_name'] %}<a href="https://echoes.mobi/killboard/view/player/{{ km['killer_name'] }}/summary" target="_blank"><img class='smallicon' src="/static/img/dogtags.png"></a>{% endif %}<a href="/search?killer_name={{ km['killer_name'] }}" class="tablelink">{{ '' if not km['killer_name'] else km['killer_name'] }}</a></td>
         {% if request.args.get('killer_ship_type') %}<td class="hideonmobile" ><a href="/search?killer_ship_type={{ km['killer_ship_type'] }}" class="tablelink">{{ '' if not km['killer_ship_type'] else km['killer_ship_type'] }}</a></td>{% endif %}
@@ -108,6 +110,7 @@
         <!-- <td>{{ km['date_killed'] }}</td> -->
         <td><a href="/search?killer_name={{ km['killer_name'] }}&{{ url_params }}"><img src="/static/img/char-search.png"></a></td>
     </tr>
+{% set count.value = count.value + 1 %}
 {% endfor %}
 </table>
 {% endblock %}
