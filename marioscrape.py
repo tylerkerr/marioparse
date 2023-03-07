@@ -148,7 +148,7 @@ def is_month_current(month_iso):
         print(f"[-] no data for month {month_iso}")
         return False
     difference = now - status
-    data_age_hours = difference.seconds / 60 / 24
+    data_age_hours = (difference.seconds / 60 / 60) + (difference.days * 24)
     if is_this_month(month_iso):
         limit = 1
     else:
@@ -285,7 +285,6 @@ if __name__ == "__main__":
     print(f"[-] db has {km_count[0]} killmails")
 
     all_months = get_all_months()
-    print(all_months)
 
     # month_json = download_month('2022-09')
     # write_km_dict(month_json)
