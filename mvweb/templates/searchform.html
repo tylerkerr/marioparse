@@ -1,0 +1,65 @@
+<form class="filters skipEmptyFields" method="GET" autocomplete="off">
+    <div class="filterrow">
+        <div class="filter">
+            <input type="text" name="killer_corp" placeholder="Killer corp" value="{{ request.args.get('killer_corp')  or '' }}" />
+        </div>
+        <div class="filter">
+            <input type="text" name="killer_name" placeholder="Killer name" value="{{ request.args.get('killer_name') or '' }}" />
+        </div>
+        <div class="filter">
+            <input type="text" name="killer_ship_type" placeholder="Killer ship" value="{{ request.args.get('killer_ship_type') or '' }}" />
+        </div>
+        <div class="filter">
+            <input type="text" name="killer_ship_category" placeholder="Killer ship class" value="{{ request.args.get('killer_ship_category') or '' }}" />
+        </div>
+    </div>
+    <div class="filterrow">
+        <div class="filter">
+            <input type="text" name="victim_corp" placeholder="Victim corp" value="{{ request.args.get('victim_corp') or '' }}" />
+        </div>
+        <div class="filter">
+            <input type="text" name="victim_name" placeholder="Victim name" value="{{ request.args.get('victim_name') or '' }}" />
+        </div>
+        <div class="filter">
+            <input type="text" name="victim_ship_type" placeholder="Victim ship" value="{{ request.args.get('victim_ship_type') or '' }}" />
+        </div>
+        <div class="filter">
+            <input type="text" name="victim_ship_category" placeholder="Victim ship class" value="{{ request.args.get('victim_ship_category') or '' }}" />
+        </div>
+    </div>
+    <div class="filterrow">
+        <div class="filter">
+            <input type="text" name="system" placeholder="System" value="{{ request.args.get('system') or '' }}" />
+        </div>
+        <!-- <div class="filter">
+            <input type="text" name="constellation" placeholder="Constellation" value="{{ request.args.get('constellation') or '' }}" />
+        </div> -->
+        <div class="filter">
+            <input type="text" name="region" placeholder="Region" value="{{ request.args.get('region') or '' }}" />
+        </div>
+
+        <div class="filter">
+            <input type="text" name="isk" placeholder="Minimum isk value" value="{{ request.args.get('isk') or '' }}" />
+        </div>
+        <div class="filter">
+            <input type="text" name="report_id" placeholder="Killmail ID" value="{{ request.args.get('report_id')  or '' }}" />
+        </div>
+    </div>
+    <div class="filterrow">
+        <!-- <div class="filter">
+            <label class="datelabel">from</label>
+            <input class="dateinput" type="date" id="start" name="date_start" placeholder="Start date" min="2020-08-12" value="{{ request.args.get('date_start') or '' }}" />
+        </div>
+        <div class="filter">
+            <label class="datelabel">to</label>
+            <input class="dateinput" type="date" id="start" name="date_end" placeholder="End date" min="2020-08-12" value="{{ request.args.get('date_end') or '' }}" />
+        </div> -->
+        <div class="searchbutton">
+            <button type="submit" formaction="/search">Search</button>
+        </div>
+        <div class="searchbutton">
+            <button type="submit" formaction="/leaderboard">Leaderboard</button>
+            <button type="submit" formaction="/loserboard">Loserboard</button>
+        </div>
+    </div>
+</form>

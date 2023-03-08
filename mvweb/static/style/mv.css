@@ -148,8 +148,6 @@ form.filters{
     flex-direction: row;
 }
 
-
-
 .filter {
     align-items:center;
     flex-direction: row;
@@ -157,13 +155,26 @@ form.filters{
     flex: 1;
     padding: 2px;
     text-align:center;
+    font-size: 10px;
+    color: gray;
+}
+
+.datelabel {
+    display: inline-block;
+    clear: left;
+    width: 12%;
+    text-align: right;
+}
+
+.dateinput {
+    display: inline-block;
 }
 
 @media (min-width: 600px) {
     .filter {
-        justify-items: center;
+        /* justify-items: center;
         justify-content: center;
-        align-items:center;
+        align-items:center; */
         flex-direction: row;
         display: flex;
         flex: 1;
@@ -173,9 +184,9 @@ form.filters{
 }
 
 .searchbutton {
-    padding-top: 2%;
-    padding-left: 2%;
+    padding: 2px;
 }
+
 
 .tablelink {
     text-decoration: none;

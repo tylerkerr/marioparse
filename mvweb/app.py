@@ -1,6 +1,7 @@
 from os import environ, path
 from flask import Flask, Blueprint, render_template, request, url_for, redirect, g
 from flask_sqlalchemy import SQLAlchemy
+from jinja2 import Environment
 from sqlalchemy.sql import func, text
 from werkzeug.exceptions import HTTPException, InternalServerError, BadRequest
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -56,9 +57,6 @@ class Killmails(db.Model):
         return f'<Killmail {self.report_id}>'
 
 
-# @app.errorhandler(BadRequest)
-# def handle_bad_request(e):
-#     return 'bad request!', 400
 
 @app.errorhandler(405)
 def method_not_allowed(error):
@@ -86,6 +84,23 @@ app.config['STATIC_HASH'] = base64.urlsafe_b64encode(
 app.config.from_pyfile(path.join(app.root_path, 'app.cfg'))
 
 routes = Blueprint('views', __name__)
+
+with app.app_context():
+    valid_columns = [c[1] for c in db.session.execute(text('pragma table_info(Killmails)'))]
+    valid_columns.append('date_start')
+    valid_columns.append('date_end')
+
+
+def date_to_timestamp(datestring):
+    return
+
+
+@app.template_filter('urlify')
+def urlify(text):
+    return text.replace('+', '%2B') if text else None
+
+app.jinja_env.filters['urlify'] = urlify
+
 
 @routes.route('/')
 def index():
@@ -154,7 +169,6 @@ def bullying():
 
 @app.route('/search', methods=['GET'])
 def search():
-    valid_columns = [c[1] for c in db.session.execute(text('pragma table_info(Killmails)'))]
     for arg in request.args:
         if arg not in valid_columns:
             return "Very bad request", 400
@@ -194,6 +208,9 @@ def search():
               'killer_ship_type': killer_ship_type,
               'killer_ship_category': killer_ship_category,
               'timestamp': timestamp
+
+            #   'timestamp_start': timestamp_start,
+            #   'timestamp_end': timestamp_end
               }
 
     kms = db.session.execute(text('''
@@ -226,7 +243,6 @@ def search():
 
 @app.route('/leaderboard', methods=['GET'])
 def leaderboard():
-    valid_columns = [c[1] for c in db.session.execute(text('pragma table_info(Killmails)'))]
     for arg in request.args:
         if arg not in valid_columns:
             return "Very bad request", 400
@@ -295,6 +311,79 @@ def leaderboard():
     killmails = kms.all()
     url_params = request.full_path.replace('/leaderboard?', '')
     return render_template('leaderboard.html', title="killmail search", kms=killmails, url_params=url_params)
+
+
+@app.route('/loserboard', methods=['GET'])
+def loserboard():
+    for arg in request.args:
+        if arg not in valid_columns:
+            return "Very bad request", 400
+    order = 'isk'
+    direction = 'desc'
+    report_id = request.args['report_id'] if 'report_id' in request.args and request.args['report_id'] else None
+    killer_corp = sub('\*', '%', request.args['killer_corp']) if 'killer_corp' in request.args and request.args['killer_corp'] else None
+    killer_name = '%' + sub('\*', '%', request.args['killer_name']) if 'killer_name' in request.args and request.args['killer_name'] else None
+    minimum_isk = request.args['isk'] if 'isk' in request.args and request.args['isk'] else None
+    victim_ship_type = '%' + sub('\*', '%', request.args['victim_ship_type']) if 'victim_ship_type' in request.args and request.args['victim_ship_type'] else None
+    victim_ship_category = sub('\*', '%', request.args['victim_ship_category']) if 'victim_ship_category' in request.args and request.args['victim_ship_category'] else None
+    victim_name = '%' + sub('\*', '%', request.args['victim_name']) if 'victim_name' in request.args and request.args['victim_name'] else None
+    victim_corp = sub('\*', '%', request.args['victim_corp']) if 'victim_corp' in request.args and request.args['victim_corp'] else None
+    system = '%' + sub('\*', '%', request.args['system']) if 'system' in request.args and request.args['system'] else None
+    constellation = '%' + sub('\*', '%', request.args['constellation']) if 'constellation' in request.args and request.args['constellation'] else None
+    region = '%' + sub('\*', '%', request.args['region']) if 'region' in request.args and request.args['region'] else None
+    victim_total_damage_received = request.args['victim_total_damage_received'] if 'victim_total_damage_received' in request.args else None
+    max_total_participants = request.args['total_participants'] if 'total_participants' in request.args else None
+    killer_ship_type = '%' + sub('\*', '%', request.args['killer_ship_type']) if 'killer_ship_type' in request.args and request.args['killer_ship_type'] else None
+    killer_ship_category = sub('\*', '%', request.args['killer_ship_category']) if 'killer_ship_category' in request.args and request.args['killer_ship_category'] else None
+    timestamp = request.args['timestamp'] if 'timestamp' in request.args else None
+    
+    params = {
+              'report_id': report_id,
+              'killer_corp': killer_corp,
+              'killer_name': killer_name,
+              'minimum_isk': minimum_isk,
+              'victim_ship_type': victim_ship_type,
+              'victim_ship_category': victim_ship_category,
+              'victim_name': victim_name,
+              'victim_corp': victim_corp,
+              'system': system,
+              'constellation': constellation,
+              'region': region,
+              'victim_total_damage_received': victim_total_damage_received,
+              'max_total_participants': max_total_participants,
+              'killer_ship_type': killer_ship_type,
+              'killer_ship_category': killer_ship_category,
+              'timestamp': timestamp
+              }
+
+    kms = db.session.execute(text('''
+                                    SELECT *, COUNT(report_id), SUM(ISK) FROM Killmails
+                                    WHERE
+                                    (:report_id IS NULL OR report_id = :report_id) AND
+                                    (:killer_corp IS NULL OR killer_corp LIKE :killer_corp) AND
+                                    (:killer_name IS NULL OR killer_name LIKE :killer_name) AND
+                                    (:minimum_isk IS NULL OR isk >= :minimum_isk) AND
+                                    (:victim_ship_type IS NULL OR victim_ship_type LIKE :victim_ship_type) AND
+                                    (:victim_ship_category IS NULL OR victim_ship_category LIKE :victim_ship_category) AND
+                                    (:victim_name IS NULL OR victim_name LIKE :victim_name) AND
+                                    (:victim_corp IS NULL OR victim_corp LIKE :victim_corp) AND
+                                    (:system IS NULL OR system LIKE :system) AND
+                                    (:constellation IS NULL OR constellation LIKE :constellation) AND
+                                    (:region IS NULL OR region LIKE :region) AND
+                                    (:victim_total_damage_received IS NULL OR victim_total_damage_received LIKE :victim_total_damage_received) AND
+                                    (:max_total_participants IS NULL OR total_participants <= :max_total_participants) AND
+                                    (:killer_ship_type IS NULL OR killer_ship_type LIKE :killer_ship_type) AND
+                                    (:killer_ship_category IS NULL OR killer_ship_category LIKE :killer_ship_category) AND
+                                    (:timestamp IS NULL OR timestamp LIKE :timestamp) AND
+                                    isk > 0
+                                    GROUP BY victim_name
+                                    ORDER BY SUM(isk) DESC
+                                  '''), params=params)
+
+    killmails = kms.all()
+    url_params = request.full_path.replace('/loserboard?', '')
+    return render_template('loserboard.html', title="killmail search", kms=killmails, url_params=url_params)
+
 
 
 @app.before_first_request

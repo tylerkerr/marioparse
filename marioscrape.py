@@ -150,7 +150,7 @@ def is_month_current(month_iso):
     difference = now - status
     data_age_hours = (difference.seconds / 60 / 60) + (difference.days * 24)
     if is_this_month(month_iso):
-        limit = 1
+        limit = 0.5
     else:
         limit = 48
     if data_age_hours <= limit:
