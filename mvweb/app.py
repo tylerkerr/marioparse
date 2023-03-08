@@ -1,15 +1,17 @@
 from os import environ, path
-from flask import Flask, Blueprint, render_template, request, url_for, redirect, g
+from flask import Flask, Blueprint, render_template, request, url_for, redirect, g, send_file
 from flask_sqlalchemy import SQLAlchemy
 from jinja2 import Environment
 from sqlalchemy.sql import func, text
 from werkzeug.exceptions import HTTPException, InternalServerError, BadRequest
 from werkzeug.middleware.proxy_fix import ProxyFix
+from datetime import datetime, timezone
 from dateutil import parser
 from glob import glob
 from hashlib import md5
+from csv import writer
 from re import sub
-from datetime import datetime, timezone
+import io
 import logging
 import base64
 import time
@@ -89,10 +91,24 @@ with app.app_context():
     valid_columns = [c[1] for c in db.session.execute(text('pragma table_info(Killmails)'))]
     valid_columns.append('date_start')
     valid_columns.append('date_end')
+    valid_columns.append('csv')
 
 
 def date_to_timestamp(datestring):
     return
+
+
+def make_csv(killmails):
+    headers = killmails[0]._fields
+    csv = io.StringIO()
+    w = writer(csv)
+    w.writerow(headers)
+    w.writerows(killmails)
+    file = io.BytesIO()
+    file.write(csv.getvalue().encode())
+    file.seek(0)
+    csv.close()
+    return file
 
 
 @app.template_filter('urlify')
@@ -117,8 +133,11 @@ def index():
 
     update_seconds_old = (datetime.now(timezone.utc) - parser.isoparse(update_time)).total_seconds()
     update_minutes_old = int(divmod(update_seconds_old , 60)[0])
+
+    killmails = latest.all()
+    csv = make_csv(killmails)
     
-    return render_template('index.html', kms=latest.all(), update_age_minutes=update_minutes_old, title="latest")
+    return render_template('index.html', kms=killmails, csv=csv, update_age_minutes=update_minutes_old, title="latest")
 
 
 @app.before_request
@@ -172,8 +191,6 @@ def search():
     for arg in request.args:
         if arg not in valid_columns:
             return "Very bad request", 400
-    order = 'isk'
-    direction = 'desc'
     report_id = request.args['report_id'] if 'report_id' in request.args and request.args['report_id'] else None
     killer_corp = sub('\*', '%', request.args['killer_corp']) if 'killer_corp' in request.args and request.args['killer_corp'] else None
     killer_name = '%' + sub('\*', '%', request.args['killer_name']) if 'killer_name' in request.args and request.args['killer_name'] else None
@@ -237,6 +254,12 @@ def search():
                                   '''), params=params)
 
     killmails = kms.all()
+    if request.args.get("csv", default=False, type=bool):
+        csv = make_csv(killmails)
+        datestamp = datetime.now().strftime("%Y-%m-%d")
+        filename = '&'.join([f"{key}={val}" for key,val in (request.args.items()) if key != 'csv']) + f'-{datestamp}.csv'
+        return send_file(csv, download_name=filename, as_attachment=True)
+
     isk_total = sum(km._mapping['isk'] for km in killmails)
     return render_template('search.html', title="killmail search", kms=killmails, isk_total=isk_total)
 
