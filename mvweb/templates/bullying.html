@@ -11,8 +11,8 @@
 {% for pair in bullies %}
     <tr>
         <td>{{ count.value }}</td>
-        <td>{{ pair[0] }}</td>
-        <td>{{ pair[1] }}</td>
+        <td><a href="/search?killer_corp={{ pair[0] }}&victim_corp={{ pair[1] }}" class="tablelink">{{ pair[0] }}</a></td>
+        <td><a href="/search?killer_corp={{ pair[0] }}&victim_corp={{ pair[1] }}" class="tablelink">{{ pair[1] }}</a></td>
         <td>{{ "{:,}".format(pair[2]) }}</td>
     </tr>
     {% set count.value = count.value + 1 %}
