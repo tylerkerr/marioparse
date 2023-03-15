@@ -2,7 +2,7 @@ from os import environ, path
 from flask import Flask, Blueprint, render_template, request, url_for, redirect, g, send_file
 from flask_sqlalchemy import SQLAlchemy
 from jinja2 import Environment
-from sqlalchemy.sql import func, text
+from sqlalchemy.sql import text, bindparam
 from werkzeug.exceptions import HTTPException, InternalServerError, BadRequest
 from werkzeug.middleware.proxy_fix import ProxyFix
 from datetime import datetime, timezone
@@ -58,7 +58,6 @@ class Killmails(db.Model):
         return f'<Killmail {self.report_id}>'
 
 
-
 @app.errorhandler(405)
 def method_not_allowed(error):
     return redirect("/", code=302)
@@ -93,6 +92,9 @@ with app.app_context():
     valid_columns.append('csv')
 
 
+### utilities
+
+
 def date_to_timestamp(datestring, end=False):
     if not datestring:
         return None
@@ -121,60 +123,107 @@ def make_csv(killmails):
     return file
 
 
-def gen_params(request_args):
-    report_id = request_args['report_id'] if 'report_id' in request_args and request_args['report_id'] else None
-    killer_corp = sub('\*', '%', request_args['killer_corp']) if 'killer_corp' in request_args and request_args['killer_corp'] else None
-    killer_name = '%' + sub('\*', '%', request_args['killer_name']) if 'killer_name' in request_args and request_args['killer_name'] else None
-    minimum_isk = request_args['isk'] if 'isk' in request_args and request_args['isk'] else None
-    victim_ship_type = '%' + sub('\*', '%', request_args['victim_ship_type']) if 'victim_ship_type' in request_args and request_args['victim_ship_type'] else None
-    victim_ship_category = sub('\*', '%', request_args['victim_ship_category']) if 'victim_ship_category' in request_args and request_args['victim_ship_category'] else None
-    victim_name = '%' + sub('\*', '%', request_args['victim_name']) if 'victim_name' in request_args and request_args['victim_name'] else None
-    victim_corp = sub('\*', '%', request_args['victim_corp']) if 'victim_corp' in request_args and request_args['victim_corp'] else None
-    system = '%' + sub('\*', '%', request_args['system']) if 'system' in request_args and request_args['system'] else None
-    constellation = '%' + sub('\*', '%', request_args['constellation']) if 'constellation' in request_args and request_args['constellation'] else None
-    region = '%' + sub('\*', '%', request_args['region']) if 'region' in request_args and request_args['region'] else None
-    victim_total_damage_received = request_args['victim_total_damage_received'] if 'victim_total_damage_received' in request_args else None
-    max_total_participants = request_args['total_participants'] if 'total_participants' in request_args else None
-    killer_ship_type = '%' + sub('\*', '%', request_args['killer_ship_type']) if 'killer_ship_type' in request_args and request_args['killer_ship_type'] else None
-    killer_ship_category = sub('\*', '%', request_args['killer_ship_category']) if 'killer_ship_category' in request_args and request_args['killer_ship_category'] else None
-    timestamp = request_args['timestamp'] if 'timestamp' in request_args else None
-    date_start = request_args['date_start'] if 'date_start' in request_args else None
-    date_end = request_args['date_end'] if 'date_end' in request_args else None
+def prep_param(param, fuzzy=False):
+    if not param:
+        return None
+    if ',' in param:
+        param_list = [item.lower().strip(' ') for item in param.split(',')]
+        return tuple(param_list)
+    if fuzzy:
+        param = '%' + param.strip(' ')
+    return sub('\*', '%', param)
 
-    timestamp_start = date_to_timestamp(date_start)
-    timestamp_end = date_to_timestamp(date_end, end=True)
+
+def gen_params(request_args):
+    timestamp_start = date_to_timestamp(request_args.get('date_start'))
+    timestamp_end = date_to_timestamp(request_args.get('date_end'), end=True)
 
     if timestamp_start and timestamp_end and timestamp_start > timestamp_end:
         timestamp_start, timestamp_end = None, None
     
     params = {
-              'report_id': report_id,
-              'killer_corp': killer_corp,
-              'killer_name': killer_name,
-              'minimum_isk': minimum_isk,
-              'victim_ship_type': victim_ship_type,
-              'victim_ship_category': victim_ship_category,
-              'victim_name': victim_name,
-              'victim_corp': victim_corp,
-              'system': system,
-              'constellation': constellation,
-              'region': region,
-              'victim_total_damage_received': victim_total_damage_received,
-              'max_total_participants': max_total_participants,
-              'killer_ship_type': killer_ship_type,
-              'killer_ship_category': killer_ship_category,
-              'timestamp': timestamp,
+              'report_id': request_args.get('report_id'),
+              'killer_corp': prep_param(request_args.get('killer_corp'), fuzzy=True),
+              'killer_name': prep_param(request_args.get('killer_name'), fuzzy=True),
+              'minimum_isk': request_args.get('isk'),
+              'victim_ship_type': prep_param(request_args.get('victim_ship_type'), fuzzy=True),
+              'victim_ship_category': prep_param(request_args.get('victim_ship_category')),
+              'victim_name': prep_param(request_args.get('victim_name'), fuzzy=True),
+              'victim_corp': prep_param(request_args.get('victim_corp'), fuzzy=True),
+              'system': prep_param(request_args.get('system'), fuzzy=True),
+              'constellation': prep_param(request_args.get('constellation'), fuzzy=True),
+              'region': prep_param(request_args.get('region'), fuzzy=True),
+              'victim_total_damage_received': request_args.get('victim_total_damage_received'),
+              'max_total_participants': request_args.get('max_total_participants'),
+              'killer_ship_type': prep_param(request_args.get('killer_ship_type'), fuzzy=True),
+              'killer_ship_category': prep_param(request_args.get('killer_ship_category')),
+              'timestamp': request_args.get('timestamp'),
               'timestamp_start': timestamp_start,
               'timestamp_end': timestamp_end
               }
 
     return params
 
+
+def prep_select(param, value):
+    if type(value) is tuple:
+        return f'lower({param}) IN :{param}'
+    else:
+        return f'{param} LIKE :{param}'
+
+def gen_select(start, end, params):
+    select = []
+    expand_params = []
+    for param in params:
+        if params[param]:
+            if param == 'report_id':
+                select.append('report_id = :report_id')
+            elif param == 'minimum_isk':
+                select.append('isk >= :minimum_isk')
+            elif param == 'victim_total_damage_received':
+                select.append('victim_total_damage_received >= :victim_total_damage_received')
+            elif param == 'max_total_participants':
+                select.append('total_participants >= :max_total_participants')
+            elif param == 'timestamp_start':
+                select.append('timestamp >= :timestamp_start')
+            elif param == 'timestamp_end':
+                select.append('timestamp <= :timestamp_end')
+            else:
+                if type(params[param]) is tuple:
+                    expand_params.append(param)
+                    select.append(f'lower({param}) IN :{param}')
+                else:
+                    select.append(f'{param} LIKE :{param}')
+
+    select = ' AND '.join(select)
+    query = text(' '.join([start, select, end]))
+
+    for p in expand_params:
+        query = query.bindparams(bindparam(p, expanding=True))
+
+    return query
+
+
 @app.template_filter('urlify')
 def urlify(text):
-    return text.replace('+', '%2B') if text else None
+    return text.replace('+', '%2B').replace('*', '%2A') if text else None
 
 app.jinja_env.filters['urlify'] = urlify
+
+
+@app.before_first_request
+def database_tweak():
+    print("increasing cache size")
+    db.session.execute(text('PRAGMA cache_size=-200000'))
+
+
+@app.before_request
+def before_request():
+    g.request_start_time = time.time()
+    g.request_time = lambda: "%.5fs" % (time.time() - g.request_start_time)
+
+
+### routes
 
 
 @routes.route('/')
@@ -199,10 +248,65 @@ def index():
     return render_template('index.html', kms=killmails, csv=csv, update_age_minutes=update_minutes_old, title="latest")
 
 
-@app.before_request
-def before_request():
-    g.request_start_time = time.time()
-    g.request_time = lambda: "%.5fs" % (time.time() - g.request_start_time)
+@app.route('/search', methods=['GET'])
+def search():
+    for arg in request.args:
+        if arg not in valid_columns:
+            return "Very bad request", 400
+    
+    params = gen_params(request.args)
+    start = "SELECT * FROM Killmails WHERE"
+    end = "ORDER BY isk DESC LIMIT 10000"
+    query = gen_select(start, end, params)
+
+    kms = db.session.execute(query, params=params)
+
+    killmails = kms.all()
+    if request.args.get("csv", default=False, type=bool):
+        csv = make_csv(killmails)
+        datestamp = datetime.now().strftime("%Y-%m-%d")
+        filename = '&'.join([f"{key}={val}" for key,val in (request.args.items()) if key != 'csv']) + f'-{datestamp}.csv'
+        return send_file(csv, download_name=filename, as_attachment=True)
+
+    isk_total = sum(km._mapping['isk'] for km in killmails)
+
+    return render_template('search.html', title="killmail search", kms=killmails, isk_total=isk_total, timestamp_start=params['timestamp_start'], timestamp_end=params['timestamp_end'])
+
+
+@app.route('/leaderboard', methods=['GET'])
+def leaderboard():
+    for arg in request.args:
+        if arg not in valid_columns:
+            return "Very bad request", 400
+
+    params = gen_params(request.args)
+    start = "SELECT *, COUNT(report_id), SUM(ISK) FROM Killmails WHERE"
+    end = "AND isk > 0 GROUP BY killer_name ORDER BY SUM(isk) DESC"
+    query = gen_select(start, end, params)
+
+    kms = db.session.execute(query, params=params)
+
+    killmails = kms.all()
+    url_params = request.full_path.replace('/leaderboard?', '')
+    return render_template('leaderboard.html', title="killmail search", kms=killmails, url_params=url_params)
+
+
+@app.route('/loserboard', methods=['GET'])
+def loserboard():
+    for arg in request.args:
+        if arg not in valid_columns:
+            return "Very bad request", 400
+
+    params = gen_params(request.args)
+    start = "SELECT *, COUNT(report_id), SUM(ISK) FROM Killmails WHERE"
+    end = "AND isk > 0 GROUP BY victim_name ORDER BY SUM(isk) DESC"
+    query = gen_select(start, end, params)
+
+    kms = db.session.execute(query, params=params)
+
+    killmails = kms.all()
+    url_params = request.full_path.replace('/loserboard?', '')
+    return render_template('loserboard.html', title="killmail search", kms=killmails, url_params=url_params)
 
 
 @app.route('/positivity')
@@ -241,134 +345,7 @@ def bullying():
                                         ORDER BY sum(isk) desc
                                         LIMIT 500
     '''))
-
     return render_template('bullying.html', title="bullying olympics", bullies=bullies)
-
-
-@app.route('/search', methods=['GET'])
-def search():
-    for arg in request.args:
-        if arg not in valid_columns:
-            return "Very bad request", 400
-    
-    params = gen_params(request.args)
-
-    kms = db.session.execute(text('''
-                                    SELECT * FROM Killmails
-                                    WHERE
-                                    (:report_id IS NULL OR report_id = :report_id) AND
-                                    (:killer_corp IS NULL OR killer_corp LIKE :killer_corp) AND
-                                    (:killer_name IS NULL OR killer_name LIKE :killer_name) AND
-                                    (:minimum_isk IS NULL OR isk >= :minimum_isk) AND
-                                    (:victim_ship_type IS NULL OR victim_ship_type LIKE :victim_ship_type) AND
-                                    (:victim_ship_category IS NULL OR victim_ship_category LIKE :victim_ship_category) AND
-                                    (:victim_name IS NULL OR victim_name LIKE :victim_name) AND
-                                    (:victim_corp IS NULL OR victim_corp LIKE :victim_corp) AND
-                                    (:system IS NULL OR system LIKE :system) AND
-                                    (:constellation IS NULL OR constellation LIKE :constellation) AND
-                                    (:region IS NULL OR region LIKE :region) AND
-                                    (:victim_total_damage_received IS NULL OR victim_total_damage_received LIKE :victim_total_damage_received) AND
-                                    (:max_total_participants IS NULL OR total_participants <= :max_total_participants) AND
-                                    (:killer_ship_type IS NULL OR killer_ship_type LIKE :killer_ship_type) AND
-                                    (:killer_ship_category IS NULL OR killer_ship_category LIKE :killer_ship_category) AND
-                                    (:timestamp_start IS NULL OR timestamp >= :timestamp_start) AND
-                                    (:timestamp_end IS NULL OR timestamp <= :timestamp_end)
-                                    ORDER BY isk DESC
-                                    LIMIT 10000
-                                  '''), params=params)
-
-    killmails = kms.all()
-    if request.args.get("csv", default=False, type=bool):
-        csv = make_csv(killmails)
-        datestamp = datetime.now().strftime("%Y-%m-%d")
-        filename = '&'.join([f"{key}={val}" for key,val in (request.args.items()) if key != 'csv']) + f'-{datestamp}.csv'
-        return send_file(csv, download_name=filename, as_attachment=True)
-
-    isk_total = sum(km._mapping['isk'] for km in killmails)
-    return render_template('search.html', title="killmail search", kms=killmails, isk_total=isk_total, timestamp_start=params['timestamp_start'], timestamp_end=params['timestamp_end'])
-
-
-@app.route('/leaderboard', methods=['GET'])
-def leaderboard():
-    for arg in request.args:
-        if arg not in valid_columns:
-            return "Very bad request", 400
-
-    params = gen_params(request.args)
-
-    kms = db.session.execute(text('''
-                                    SELECT *, COUNT(report_id), SUM(ISK) FROM Killmails
-                                    WHERE
-                                    (:report_id IS NULL OR report_id = :report_id) AND
-                                    (:killer_corp IS NULL OR killer_corp LIKE :killer_corp) AND
-                                    (:killer_name IS NULL OR killer_name LIKE :killer_name) AND
-                                    (:minimum_isk IS NULL OR isk >= :minimum_isk) AND
-                                    (:victim_ship_type IS NULL OR victim_ship_type LIKE :victim_ship_type) AND
-                                    (:victim_ship_category IS NULL OR victim_ship_category LIKE :victim_ship_category) AND
-                                    (:victim_name IS NULL OR victim_name LIKE :victim_name) AND
-                                    (:victim_corp IS NULL OR victim_corp LIKE :victim_corp) AND
-                                    (:system IS NULL OR system LIKE :system) AND
-                                    (:constellation IS NULL OR constellation LIKE :constellation) AND
-                                    (:region IS NULL OR region LIKE :region) AND
-                                    (:victim_total_damage_received IS NULL OR victim_total_damage_received LIKE :victim_total_damage_received) AND
-                                    (:max_total_participants IS NULL OR total_participants <= :max_total_participants) AND
-                                    (:killer_ship_type IS NULL OR killer_ship_type LIKE :killer_ship_type) AND
-                                    (:killer_ship_category IS NULL OR killer_ship_category LIKE :killer_ship_category) AND
-                                    (:timestamp_start IS NULL OR timestamp >= :timestamp_start) AND
-                                    (:timestamp_end IS NULL OR timestamp <= :timestamp_end) AND
-                                    isk > 0
-                                    GROUP BY killer_name
-                                    ORDER BY SUM(isk) DESC
-                                  '''), params=params)
-
-    killmails = kms.all()
-    url_params = request.full_path.replace('/leaderboard?', '')
-    return render_template('leaderboard.html', title="killmail search", kms=killmails, url_params=url_params)
-
-
-@app.route('/loserboard', methods=['GET'])
-def loserboard():
-    for arg in request.args:
-        if arg not in valid_columns:
-            return "Very bad request", 400
-
-    params = gen_params(request.args)
-
-    kms = db.session.execute(text('''
-                                    SELECT *, COUNT(report_id), SUM(ISK) FROM Killmails
-                                    WHERE
-                                    (:report_id IS NULL OR report_id = :report_id) AND
-                                    (:killer_corp IS NULL OR killer_corp LIKE :killer_corp) AND
-                                    (:killer_name IS NULL OR killer_name LIKE :killer_name) AND
-                                    (:minimum_isk IS NULL OR isk >= :minimum_isk) AND
-                                    (:victim_ship_type IS NULL OR victim_ship_type LIKE :victim_ship_type) AND
-                                    (:victim_ship_category IS NULL OR victim_ship_category LIKE :victim_ship_category) AND
-                                    (:victim_name IS NULL OR victim_name LIKE :victim_name) AND
-                                    (:victim_corp IS NULL OR victim_corp LIKE :victim_corp) AND
-                                    (:system IS NULL OR system LIKE :system) AND
-                                    (:constellation IS NULL OR constellation LIKE :constellation) AND
-                                    (:region IS NULL OR region LIKE :region) AND
-                                    (:victim_total_damage_received IS NULL OR victim_total_damage_received LIKE :victim_total_damage_received) AND
-                                    (:max_total_participants IS NULL OR total_participants <= :max_total_participants) AND
-                                    (:killer_ship_type IS NULL OR killer_ship_type LIKE :killer_ship_type) AND
-                                    (:killer_ship_category IS NULL OR killer_ship_category LIKE :killer_ship_category) AND
-                                    (:timestamp_start IS NULL OR timestamp >= :timestamp_start) AND
-                                    (:timestamp_end IS NULL OR timestamp <= :timestamp_end) AND
-                                    isk > 0
-                                    GROUP BY victim_name
-                                    ORDER BY SUM(isk) DESC
-                                  '''), params=params)
-
-    killmails = kms.all()
-    url_params = request.full_path.replace('/loserboard?', '')
-    return render_template('loserboard.html', title="killmail search", kms=killmails, url_params=url_params)
-
-
-
-@app.before_first_request
-def database_tweak():
-    print("increasing cache size")
-    db.session.execute(text('PRAGMA cache_size=-200000'))
 
 
 app.register_blueprint(routes)
