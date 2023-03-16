@@ -269,9 +269,18 @@ def is_faction(shipname):
         return True
     return False
 
+@app.template_filter('is_faction_possible')
+def is_faction_possible(shipclass):
+    if not shipclass:
+        return False
+    if shipclass.lower() in ['frigate', 'cruiser', 'battleship']:
+        return True
+    return False
+
 app.jinja_env.filters['urlify'] = urlify
 app.jinja_env.filters['get_system_sec'] = get_system_sec
 app.jinja_env.filters['is_faction'] = is_faction
+app.jinja_env.filters['is_faction_possible'] = is_faction_possible
 
 @app.before_first_request
 def app_setup():

@@ -1,0 +1,18 @@
+<tr>
+    <td><a href="/search?killer_corp={{ km['killer_corp'] }}" class="tablelink">{{ '' if not km['killer_corp'] else km['killer_corp'] }}</a></td>
+    <td class="nowrapname">{% if km['killer_name'] %}<a href="https://echoes.mobi/killboard/view/player/{{ km['killer_name']|urlify }}/summary" target="_blank"><img class='smallicon' src="/static/img/dogtags.png"></a>{% endif %}<a href="/search?killer_name={{ km['killer_name']|urlify }}" class="tablelink">{{ '' if not km['killer_name'] else km['killer_name'] }}</a></td>
+    <td class="hideonmobile" ><a href="/search?killer_ship_type={{ km['killer_ship_type'] }}" class="tablelink">{{ '' if not km['killer_ship_type'] else km['killer_ship_type'] }}</a></td>
+    <td class="hideonmobile" ><a href="/search?killer_ship_category={{ km['killer_ship_category'] }}"><img src="/static/img/shipclass/{% if km['victim_ship_class']|is_faction_possible %}{% if km['killer_ship_type']|is_faction %}faction {% endif %}{% endif %}{{ km['killer_ship_category']|lower }}.png"></a></td>
+    <td><a href="/search?victim_corp={{ km['victim_corp'] }}" class="tablelink">{{ '' if not km['victim_corp'] else km['victim_corp'] }}</a></td>
+    <td class="nowrapname">{% if km['victim_name'] %}<a href="https://echoes.mobi/killboard/view/player/{{ km['victim_name']|urlify }}/summary" target="_blank"><img class='smallicon' src="/static/img/dogtags.png"></a>{% endif %}<a href="/search?victim_name={{ km['victim_name']|urlify }}" class="tablelink">{{ '' if not km['victim_name'] else km['victim_name'] }}</a></td>
+    <td><a href="/search?victim_ship_type={{ km['victim_ship_type'] }}" class="tablelink">{{ '' if not km['victim_ship_type'] else  km['victim_ship_type'] }}</a></td>
+    <td class="hideonmobile" ><a href="/search?victim_ship_category={{ km['victim_ship_category'] }}" class="tablelink"><img src="/static/img/shipclass/{% if km['victim_ship_class']|is_faction_possible %}{% if km['victim_ship_type']|is_faction %}faction {% endif %}{% endif %}{{ km['victim_ship_category']|lower }}.png"></a></td>
+    <td class="hideonmobile" ><a href="/search?system={{ km['system'] }}" class="tablelink">{{ '' if not km['system'] else km['system']}}</a></td>
+    <!-- <td>{{ km['constellation'] }}</td> -->
+    <td class="{{ km['system']|get_system_sec }}"><a href="/search?region={{ km['region'] }}" class="tablelink">{{ '' if not km['region'] else km['region']}}</a></td>
+    <td>{{ "{:,}".format(km['isk']) }}</td>
+    <!-- <td>{{ km['victim_total_damage_received'] }}</td> -->
+    <!-- <td>{{ km['total_participants'] }}</td> -->
+    <td>{{ km['date_killed'] }}</td>
+    <td><a href="{{ km['image_url'] }}" target="_blank">{% if kms|length < 100 %}<img src="{{ km['image_url'] }}" class="km_img_small">{% else %}<img src="/static/img/killreport.png">{% endif %}</a></td>
+</tr>
