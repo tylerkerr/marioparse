@@ -11,6 +11,18 @@ body {
     padding-top: 10px;
 }
 
+.iconcolumn {
+    width: 40px;
+}
+
+.hugekill {
+    text-shadow:1px 1px 10px #fff, 1px 1px 10px violet;
+}
+
+.bigkill {
+    text-shadow:1px 1px 10px #fff;
+}
+
 .hisec .tablelink {
     color: #24e576;
 }
