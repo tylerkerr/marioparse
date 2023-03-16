@@ -9,8 +9,9 @@ from datetime import datetime, timezone
 from dateutil import parser
 from glob import glob
 from hashlib import md5
-from csv import writer
+from csv import writer, reader
 from re import sub
+from math import copysign
 import io
 import logging
 import base64
@@ -123,6 +124,42 @@ def make_csv(killmails):
     return file
 
 
+def parse_truesec_csv():
+    stars_truesec = {}
+    with open('truesec.csv') as trueseccsv:
+        csvreader = reader(trueseccsv)
+        next(csvreader)     # skip header row
+        for row in csvreader:
+            stars_truesec[row[0]] = row[1]
+    return stars_truesec
+
+
+def get_sign(x):
+    return copysign(1, x)
+
+
+def get_rounded_sec(system):
+    if system in invalid_systems:
+        return None
+    if system not in truesec:
+        invalid_systems.append(system)
+        return None
+    truncated = str(truesec[system])[0:5]
+    rounded = round(float(truncated), 1)
+    return rounded
+
+
+def get_sec_status(rounded_sec):
+    if rounded_sec == None:
+        return 'invalid'
+    if get_sign(rounded_sec) == -1:
+        return 'nullsec'
+    elif rounded_sec >= 0.5:
+        return 'hisec'
+    else:
+        return 'lowsec'
+
+
 def prep_param(param, fuzzy=False):
     if not param:
         return None
@@ -208,13 +245,44 @@ def gen_select(start, end, params):
 def urlify(text):
     return text.replace('+', '%2B').replace('*', '%2A') if text else None
 
-app.jinja_env.filters['urlify'] = urlify
 
+@app.template_filter('get_system_sec')
+def get_system_sec(system):
+    if system in sec_lookup:
+        return sec_lookup[system]
+    system_rounded = get_rounded_sec(system)
+    star_security = get_sec_status(system_rounded)
+    sec_lookup[system] = star_security
+    return star_security
+
+@app.template_filter('is_faction')
+def is_faction(shipname):
+    if not shipname:
+        return False
+    if shipname.lower() in ['garmur', 'orthrus', 'barghest',
+                    'astero', 'stratios', 'nestor',
+                    'succubus', 'phantasm', 'nightmare',
+                    'worm', 'gila', 'rattlesnake',
+                    'daredevil', 'vigilant', 'vindicator',
+                    'dramiel', 'cynabal', 'machariel',
+                    'cruor', 'ashimmu', 'bhaalgorn']:
+        return True
+    return False
+
+app.jinja_env.filters['urlify'] = urlify
+app.jinja_env.filters['get_system_sec'] = get_system_sec
+app.jinja_env.filters['is_faction'] = is_faction
 
 @app.before_first_request
-def database_tweak():
+def app_setup():
     print("increasing cache size")
     db.session.execute(text('PRAGMA cache_size=-200000'))
+    global truesec
+    truesec = parse_truesec_csv()
+    global sec_lookup
+    sec_lookup = {}
+    global invalid_systems
+    invalid_systems = []
 
 
 @app.before_request

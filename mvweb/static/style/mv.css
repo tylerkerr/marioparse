@@ -11,6 +11,18 @@ body {
     padding-top: 10px;
 }
 
+.hisec .tablelink {
+    color: #24e576;
+}
+
+.lowsec .tablelink {
+    color: #cd7d3c;
+}
+
+.nullsec .tablelink {
+    color: #b50000;
+}
+
 .mobilesizewarning {
     border-top: 40px;
     padding-bottom: 40px;
