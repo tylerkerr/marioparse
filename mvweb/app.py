@@ -126,7 +126,7 @@ def make_csv(killmails):
 
 def parse_truesec_csv():
     stars_truesec = {}
-    with open('truesec.csv') as trueseccsv:
+    with open(path.join(basedir, 'truesec.csv')) as trueseccsv:
         csvreader = reader(trueseccsv)
         next(csvreader)     # skip header row
         for row in csvreader:
