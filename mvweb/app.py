@@ -191,7 +191,7 @@ def gen_params(request_args):
               'constellation': prep_param(request_args.get('constellation'), fuzzy=True),
               'region': prep_param(request_args.get('region'), fuzzy=True),
               'victim_total_damage_received': request_args.get('victim_total_damage_received'),
-              'max_total_participants': request_args.get('max_total_participants'),
+              'max_total_participants': request_args.get('total_participants'),
               'killer_ship_type': prep_param(request_args.get('killer_ship_type'), fuzzy=True),
               'killer_ship_category': prep_param(request_args.get('killer_ship_category')),
               'timestamp': request_args.get('timestamp'),
@@ -220,7 +220,7 @@ def gen_select(start, end, params):
             elif param == 'victim_total_damage_received':
                 select.append('victim_total_damage_received >= :victim_total_damage_received')
             elif param == 'max_total_participants':
-                select.append('total_participants >= :max_total_participants')
+                select.append('total_participants <= :max_total_participants')
             elif param == 'timestamp_start':
                 select.append('timestamp >= :timestamp_start')
             elif param == 'timestamp_end':
@@ -358,7 +358,7 @@ def leaderboard():
 
     params = gen_params(request.args)
     start = "SELECT *, COUNT(report_id), SUM(ISK) FROM Killmails WHERE"
-    end = "AND isk > 0 GROUP BY killer_name ORDER BY SUM(isk) DESC"
+    end = "AND isk > 0 GROUP BY killer_name ORDER BY SUM(isk) DESC LIMIT 1000"
     query = gen_select(start, end, params)
 
     kms = db.session.execute(query, params=params)
@@ -376,7 +376,7 @@ def loserboard():
 
     params = gen_params(request.args)
     start = "SELECT *, COUNT(report_id), SUM(ISK) FROM Killmails WHERE"
-    end = "AND isk > 0 GROUP BY victim_name ORDER BY SUM(isk) DESC"
+    end = "AND isk > 0 GROUP BY victim_name ORDER BY SUM(isk) DESC LIMIT 1000"
     query = gen_select(start, end, params)
 
     kms = db.session.execute(query, params=params)
@@ -424,6 +424,10 @@ def bullying():
     '''))
     return render_template('bullying.html', title="bullying olympics", bullies=bullies)
 
+
+@app.route('/solo')
+def solo():
+    return redirect("/leaderboard?total_participants=1", code=302)
 
 app.register_blueprint(routes)
 
