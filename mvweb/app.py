@@ -160,6 +160,41 @@ def get_sec_status(rounded_sec):
         return 'lowsec'
 
 
+def parse_isk_total(text):
+    if not text:
+        return '0'
+    text = text.replace(',', '')
+    if text.isdigit():
+        return text
+    if text[-1] in ['k', 'kk', 'kkk', 'm', 'b', 't']:
+        if '.' in text:
+            try:
+                num = float(text[:-1])
+            except:
+                return '0'
+        else:
+            try:
+                num = int(text[:-1])
+            except:
+                return '0'
+        mult = text[-1]
+        if mult == 'k':
+            return num * 1000
+        if mult == 'kk' or mult == 'm':
+            return num * 1000 * 1000
+        if mult == 'kkk' or mult == 'b':
+            return num * 1000 * 1000 * 1000
+        if mult == 't':
+            return num * 1000 * 1000 * 1000 * 1000
+    else:
+        if '.' in text:
+            try:
+                return float(text)
+            except:
+                return '0'
+        return '0'
+
+
 def prep_param(param, fuzzy=False):
     if not param:
         return None
@@ -182,7 +217,7 @@ def gen_params(request_args):
               'report_id': request_args.get('report_id'),
               'killer_corp': prep_param(request_args.get('killer_corp'), fuzzy=True),
               'killer_name': prep_param(request_args.get('killer_name'), fuzzy=True),
-              'minimum_isk': request_args.get('isk'),
+              'minimum_isk': parse_isk_total(request_args.get('isk')),
               'victim_ship_type': prep_param(request_args.get('victim_ship_type'), fuzzy=True),
               'victim_ship_category': prep_param(request_args.get('victim_ship_category')),
               'victim_name': prep_param(request_args.get('victim_name'), fuzzy=True),
