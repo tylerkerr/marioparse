@@ -34,7 +34,7 @@
         {{ km['victim_ship_category']|lower }}.png"></a></td>
     <td class="hideonmobile" ><a href="/search?system={{ km['system'] }}" class="tablelink">{{ '' if not km['system'] else km['system']}}</a></td>
     <!-- <td>{{ km['constellation'] }}</td> -->
-    <td class="{{ km['system']|get_system_sec }}{{ ' hideonmobile' if request.path == '/' else '' }}"><a href="/search?region={{ km['region'] }}" class="tablelink">{{ '' if not km['region'] else km['region']}}</a></td>
+    <td class="{{ km['system']|get_system_sec }} hideonmobile"><a href="/search?region={{ km['region'] }}" class="tablelink">{{ '' if not km['region'] else km['region']}}</a></td>
     <td{%- if km['isk'] > 5000000000 %}
         class="hugekill"
         {% elif km['isk'] > 1000000000 %}
