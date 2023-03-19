@@ -13,7 +13,7 @@
     turn it sideways..sorry<br />
 </p>
 <p>{{ kms|length }} killmails for {{ "{:,}".format(isk_total) }} total isk {% if kms|length > 0 %}{% include "csvlink.html" %}{% endif %}<!-- from {{ timestamp_start }} to {{ timestamp_end }}--></p>
-<table class="sortable killtable" id="resultstable">
+<table class="sortable" id="resultstable">
     {% include "tablehead.html" %}
 
     

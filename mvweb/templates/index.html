@@ -1,5 +1,12 @@
 {% extends "layout.html" %}
 {% block content %}
+<script>
+    (() => {
+        document.addEventListener("DOMContentLoaded", () => {
+            new Tablesort(document.getElementById('resultstable'), { descending: true });
+        });
+    })();
+</script>
 {% include "searchform.html" %}
 <p class="mobilesizewarning">
     your device is small<br />
