@@ -351,13 +351,21 @@ def index():
                                                   ORDER BY month DESC
                                                   LIMIT 1''')).all()[0][0]
 
+    oldest_time = db.session.execute(text('''SELECT last_refreshed 
+                                                  FROM Months
+                                                  ORDER BY month ASC
+                                                  LIMIT 1''')).all()[0][0]                                        
+
     update_seconds_old = (datetime.now(timezone.utc) - parser.isoparse(update_time)).total_seconds()
     update_minutes_old = int(divmod(update_seconds_old , 60)[0])
+
+    oldest_seconds_old = (datetime.now(timezone.utc) - parser.isoparse(oldest_time)).total_seconds()
+    oldest_hours_old = int(divmod(oldest_seconds_old , 3600)[0])
 
     killmails = latest.all()
     csv = make_csv(killmails)
     
-    return render_template('index.html', kms=killmails, csv=csv, update_age_minutes=update_minutes_old, title="latest")
+    return render_template('index.html', kms=killmails, csv=csv, update_age_minutes=update_minutes_old, oldest_hours=oldest_hours_old, title="latest")
 
 
 @app.route('/search', methods=['GET'])
