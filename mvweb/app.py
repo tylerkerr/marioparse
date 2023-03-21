@@ -329,17 +329,23 @@ def snuggly_check_pilot(pilot):
 
     return snuggly
 
+def snuggly_string(snuggly):
+    if snuggly == 0:
+        stringout = '0'
+    elif snuggly == 1.0:
+        stringout = '100'
+    elif type(snuggly) == float and (snuggly * 100).is_integer():
+        stringout = str(int(snuggly * 100))
+    else:
+        stringout = str(round(snuggly * 100, 3))
+    return stringout
+
+
 snuggly_corp_memo = {}
 def snuggly_string_corp(corp):
     if corp in snuggly_corp_memo:
         return snuggly_corp_memo[corp]
-    snuggly = snuggly_check_corp(corp)
-    if snuggly == 0:
-        return '0'
-    if snuggly == 1.0:
-        snuggly_corp_memo[corp] = '100'
-    else:
-        snuggly_corp_memo[corp] = str(round(snuggly * 100, 3))
+    snuggly_corp_memo[corp] = snuggly_string(snuggly_check_corp(corp))
     return snuggly_corp_memo[corp]
 
 
@@ -347,13 +353,7 @@ snuggly_pilot_memo = {}
 def snuggly_string_pilot(pilot):
     if pilot in snuggly_pilot_memo:
         return snuggly_pilot_memo[pilot]
-    snuggly = snuggly_check_pilot(pilot)
-    if snuggly == 0:
-        return '0'
-    if snuggly == 1.0:
-        snuggly_pilot_memo[pilot] = '100'
-    else:
-        snuggly_pilot_memo[pilot] = str(round(snuggly * 100, 3))
+    snuggly_pilot_memo[pilot] = snuggly_string(snuggly_check_pilot(pilot))
     return snuggly_pilot_memo[pilot]
     
 

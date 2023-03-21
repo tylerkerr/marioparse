@@ -62,10 +62,10 @@ window.addEventListener('DOMContentLoaded', function() {
 
 (() => {
   document.addEventListener("DOMContentLoaded", () => {
-      const corpChecks = document.querySelectorAll('.pilotstat');
-      corpChecks.forEach(corpCheck => {
-          corpCheck.addEventListener('mouseover', event => {
-              if (corpCheck !== event.target) return;
+      const pilotChecks = document.querySelectorAll('.pilotstat');
+      pilotChecks.forEach(pilotCheck => {
+        pilotCheck.addEventListener('mouseover', event => {
+              if (pilotCheck !== event.target) return;
               let tipDiv = event.target.querySelector('.pilottooltip');
               tipDiv.dataset.moused = '1';
               if (tipDiv.innerHTML.trim() == '') {
@@ -100,8 +100,8 @@ window.addEventListener('DOMContentLoaded', function() {
           })
 
       });
-    corpChecks.forEach(corpCheck => {
-      corpCheck.addEventListener('mouseleave', event => {
+      pilotChecks.forEach(pilotCheck => {
+      pilotCheck.addEventListener('mouseleave', event => {
         let tipDiv = event.target.querySelector('.pilottooltip');
         tipDiv.dataset.moused = '0';
         tipDiv.style.display = 'none';
