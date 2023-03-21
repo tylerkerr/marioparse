@@ -16,7 +16,7 @@
 <table class="sortable killtable" id="resultstable">
     <thead>
         <tr>
-            <th role="columnheader">Place</th>
+            <th role="columnheader" width="60px">Place</th>
             {% if request.args.get('killer_corp') %}<th role="columnheader" data-sort-method='default'>K. corp</th>{% endif %}
             {% if request.args.get('killer_name') %}<th role="columnheader">Killer</th>{% endif %}
             {% if request.args.get('killer_ship_type') %}<th class="hideonmobile" role="columnheader">K. ship</th>{% endif %}
@@ -40,12 +40,50 @@
 {% for km in kms %}
     <tr>
         <td>{{ count.value }}</td>
-        {% if request.args.get('killer_corp') %}<td><a href="/search?killer_corp={{ km['killer_corp'] }}" class="tablelink">{{ '' if not km['killer_corp'] else km['killer_corp'] }}</a></td>{% endif %}
-        {% if request.args.get('killer_name') %}<td class="nowrapname">{% if km['killer_name'] %}<a href="https://echoes.mobi/killboard/view/player/{{ km['killer_name']|urlify }}/summary" target="_blank"><img class='smallicon' src="/static/img/dogtags.png"></a>{% endif %}<a href="/search?killer_name={{ km['killer_name']|urlify }}" class="tablelink">{{ '' if not km['killer_name'] else km['killer_name'] }}</a></td>{% endif %}
+        {%- if request.args.get('killer_corp') %}
+            <td{% if km['killer_corp'] is not none %} class="corpstat"{% endif %}>
+                {%- if km['killer_corp'] is not none %}
+                <a href="/search?killer_corp={{ km['killer_corp'] }}" class="tablelink corplink">
+                    {{ km['killer_corp'] }}
+                </a>
+                <div class="corptooltip">
+                </div>
+                {% endif -%}
+            </td>
+        {% endif -%}
+        {%- if request.args.get('killer_name') %}
+            <td class="nowrapname{% if km['killer_name'] is not none%} pilotstat{% endif %}">
+                {%- if km['killer_name'] %}
+                    <a href="https://echoes.mobi/killboard/view/player/{{ km['killer_name']|urlify }}/summary" target="_blank"><img class='smallicon' src="/static/img/dogtags.png"></a>
+                <a href="/search?killer_name={{ km['killer_name']|urlify }}" class="tablelink pilotlink">
+                    {{ km['killer_name'] }}
+                </a>
+                <div class="pilottooltip">
+                </div>
+                {% endif %}
+            </td>
+        {% endif %}
         {% if request.args.get('killer_ship_type') %}<td class="hideonmobile" ><a href="/search?killer_ship_type={{ km['killer_ship_type'] }}" class="tablelink">{{ '' if not km['killer_ship_type'] else km['killer_ship_type'] }}</a></td>{% endif %}
         {% if request.args.get('killer_ship_category') %}<td class="hideonmobile" ><a href="/search?killer_ship_category={{ km['killer_ship_category'] }}"><img src="/static/img/shipclass/{{ km['killer_ship_category']|lower }}.png"></a></td>{% endif %}
-        {% if request.args.get('victim_corp') %}<td><a href="/search?victim_corp={{ km['victim_corp'] }}" class="tablelink">{{ '' if not km['victim_corp'] else km['victim_corp'] }}</a></td>{% endif %}
-        <td class="nowrapname">{% if km['victim_name'] %}<a href="https://echoes.mobi/killboard/view/player/{{ km['victim_name']|urlify }}/summary" target="_blank"><img class='smallicon' src="/static/img/dogtags.png"></a>{% endif %}<a href="/search?victim_name={{ km['victim_name']|urlify }}" class="tablelink">{{ '' if not km['victim_name'] else km['victim_name'] }}</a></td>
+        {% if request.args.get('victim_corp') %}
+            <td{% if km['victim_corp'] is not none %} class="corpstat"{% endif %}>
+                {%- if km['victim_corp'] is not none %}
+                <a href="/search?victim_corp={{ km['victim_corp'] }}" class="tablelink corplink">
+                    {{ km['victim_corp'] }}
+                </a>
+                <div class="corptooltip">
+                </div>
+                {% endif -%}
+            </td>
+        {% endif %}
+        <td class="nowrapname{% if km['victim_name'] is not none%} pilotstat{% endif %}">
+            {%- if km['victim_name'] %}
+                <a href="https://echoes.mobi/killboard/view/player/{{ km['victim_name']|urlify }}/summary" target="_blank"><img class='smallicon' src="/static/img/dogtags.png"></a>
+                <a href="/search?victim_name={{ km['victim_name']|urlify }}" class="tablelink pilotlink">{{ km['victim_name'] }}</a>
+                <div class="pilottooltip">
+                </div>
+            {% endif %}
+        </td>
         {% if request.args.get('victim_ship_type') %}<td><a href="/search?victim_ship_type={{ km['victim_ship_type'] }}" class="tablelink">{{ '' if not km['victim_ship_type'] else  km['victim_ship_type'] }}</a></td>{% endif %}
         {% if request.args.get('victim_ship_category') %}<td class="hideonmobile" ><a href="/search?victim_ship_category={{ km['victim_ship_category'] }}" class="tablelink"><img src="/static/img/shipclass/{{ km['victim_ship_category']|lower }}.png"></a></td>{% endif %}
         {% if request.args.get('system') %}<td class="hideonmobile" ><a href="/search?system={{ km['system'] }}" class="tablelink">{{ '' if not km['system'] else km['system']}}</a></td>{% endif %}
