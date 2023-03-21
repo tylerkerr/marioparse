@@ -335,7 +335,7 @@ def snuggly_string_corp(corp):
         return snuggly_corp_memo[corp]
     snuggly = snuggly_check_corp(corp)
     if snuggly == 0:
-        return 'n/a'
+        return '0'
     if snuggly == 1.0:
         snuggly_corp_memo[corp] = '100'
     else:
@@ -349,7 +349,7 @@ def snuggly_string_pilot(pilot):
         return snuggly_pilot_memo[pilot]
     snuggly = snuggly_check_pilot(pilot)
     if snuggly == 0:
-        return 'n/a'
+        return '0'
     if snuggly == 1.0:
         snuggly_pilot_memo[pilot] = '100'
     else:
