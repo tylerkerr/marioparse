@@ -1,5 +1,5 @@
 from os import environ, path
-from flask import Flask, Blueprint, render_template, request, url_for, redirect, g, send_file
+from flask import Flask, Blueprint, render_template, request, url_for, redirect, g, send_file, make_response
 from flask_sqlalchemy import SQLAlchemy
 from jinja2 import Environment
 from sqlalchemy.sql import text, bindparam
@@ -276,6 +276,89 @@ def gen_select(start, end, params):
     return query
 
 
+def snuggly_check_corp(corp):
+    if not corp:
+        return None
+    param = {'corp': corp}
+    corp_poz = db.session.execute(text('''
+                                        SELECT killer_corp, sum(isk)
+                                        FROM Killmails
+                                        WHERE killer_corp = :corp
+                                        GROUP BY killer_corp
+                                        ORDER BY sum(isk)
+                                       '''), param).fetchone()
+    corp_neg = db.session.execute(text('''
+                                        SELECT victim_corp, sum(isk)
+                                        FROM Killmails
+                                        WHERE victim_corp = :corp
+                                        GROUP BY victim_corp
+                                        ORDER BY sum(isk)
+                                       '''), param).fetchone()
+
+    poz = 0 if not corp_poz else corp_poz[1]
+    neg = 0 if not corp_neg else corp_neg[1]
+
+    snuggly = round(neg / (poz + neg), 3) if poz else 1
+
+    return snuggly
+
+
+def snuggly_check_pilot(pilot):
+    if not pilot:
+        return None
+    param = {'pilot': pilot}
+    pilot_poz = db.session.execute(text('''
+                                        SELECT killer_name, sum(isk)
+                                        FROM Killmails
+                                        WHERE killer_name = :pilot
+                                        GROUP BY killer_name
+                                        ORDER BY sum(isk)
+                                       '''), param).fetchone()
+    pilot_neg = db.session.execute(text('''
+                                        SELECT victim_name, sum(isk)
+                                        FROM Killmails
+                                        WHERE victim_name = :pilot
+                                        GROUP BY victim_name
+                                        ORDER BY sum(isk)
+                                       '''), param).fetchone()
+
+    poz = 0 if not pilot_poz else pilot_poz[1]
+    neg = 0 if not pilot_neg else pilot_neg[1]
+
+    snuggly = round(neg / (poz + neg), 3) if poz else 1
+
+    return snuggly
+
+snuggly_corp_memo = {}
+def snuggly_string_corp(corp):
+    if corp in snuggly_corp_memo:
+        return snuggly_corp_memo[corp]
+    snuggly = snuggly_check_corp(corp)
+    if snuggly == 0:
+        return 'n/a'
+    if snuggly == 1.0:
+        snuggly_corp_memo[corp] = '100'
+    else:
+        snuggly_corp_memo[corp] = str(round(snuggly * 100, 3))
+    return snuggly_corp_memo[corp]
+
+
+snuggly_pilot_memo = {}
+def snuggly_string_pilot(pilot):
+    if pilot in snuggly_pilot_memo:
+        return snuggly_pilot_memo[pilot]
+    snuggly = snuggly_check_pilot(pilot)
+    if snuggly == 0:
+        return 'n/a'
+    if snuggly == 1.0:
+        snuggly_pilot_memo[pilot] = '100'
+    else:
+        snuggly_pilot_memo[pilot] = str(round(snuggly * 100, 3))
+    return snuggly_pilot_memo[pilot]
+    
+
+### filters
+
 @app.template_filter('urlify')
 def urlify(text):
     return text.replace('+', '%2B').replace('*', '%2A') if text else None
@@ -289,6 +372,7 @@ def get_system_sec(system):
     star_security = get_sec_status(system_rounded)
     sec_lookup[system] = star_security
     return star_security
+
 
 @app.template_filter('is_faction')
 def is_faction(shipname):
@@ -304,6 +388,7 @@ def is_faction(shipname):
         return True
     return False
 
+
 @app.template_filter('is_faction_possible')
 def is_faction_possible(shipclass):
     if not shipclass:
@@ -312,10 +397,12 @@ def is_faction_possible(shipclass):
         return True
     return False
 
+
 app.jinja_env.filters['urlify'] = urlify
 app.jinja_env.filters['get_system_sec'] = get_system_sec
 app.jinja_env.filters['is_faction'] = is_faction
 app.jinja_env.filters['is_faction_possible'] = is_faction_possible
+
 
 @app.before_first_request
 def app_setup():
@@ -471,6 +558,17 @@ def bullying():
 @app.route('/solo')
 def solo():
     return redirect("/leaderboard?total_participants=1", code=302)
+
+
+@app.route('/api/snuggly/pilot/<pilot>')
+def api_snuggly_pilot(pilot):
+    return make_response(snuggly_string_pilot(pilot), 200)
+
+
+@app.route('/api/snuggly/corp/<corp>')
+def api_snuggly_corp(corp):
+    return make_response(snuggly_string_corp(corp), 200)
+
 
 app.register_blueprint(routes)
 
