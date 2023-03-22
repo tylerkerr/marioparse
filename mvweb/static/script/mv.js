@@ -69,8 +69,8 @@ window.addEventListener('DOMContentLoaded', function() {
               let tipDiv = event.target.querySelector('.pilottooltip');
               tipDiv.dataset.moused = '1';
               if (tipDiv.innerHTML.trim() == '') {
-                let corp = event.target.querySelector('.pilotlink').innerHTML.trim();
-                let sessionCheck = sessionStorage.getItem('pilot-' + corp)
+                let pilot = event.target.querySelector('.pilotlink').innerHTML.trim();
+                let sessionCheck = sessionStorage.getItem('pilot-' + pilot)
                 if (sessionCheck === null) {
                   let xhr = new XMLHttpRequest();
                   xhr.onreadystatechange = function() {
@@ -79,19 +79,22 @@ window.addEventListener('DOMContentLoaded', function() {
                               if (xresp != 'n/a') {
                                   xresp += '% snuggly';
                               }
-                              sessionStorage.setItem('pilot-' + corp, xresp)
-                              tipDiv.innerHTML = sessionStorage.getItem('pilot-' + corp)
+                              sessionStorage.setItem('pilot-' + pilot, xresp)
+                              tipDiv.innerHTML = sessionStorage.getItem('pilot-' + pilot)
                               if (tipDiv.dataset.moused === '1') {
                                 tipDiv.style.display = 'block';
                               }
                           }
                   }
-                  url = '/api/snuggly/pilot/' + corp;
+                  if (pilot.indexOf('/') > -1) {
+                    pilot = encodeURIComponent(encodeURIComponent(pilot));
+                  }
+                  url = '/api/snuggly/pilot/' + pilot;
                   xhr.responseType = 'text';
                   xhr.open('GET', url);
                   xhr.send();
                 } else {
-                  tipDiv.innerHTML = sessionStorage.getItem('pilot-' + corp)
+                  tipDiv.innerHTML = sessionStorage.getItem('pilot-' + pilot)
                   tipDiv.style.display = 'block';
                 }
               } else {
