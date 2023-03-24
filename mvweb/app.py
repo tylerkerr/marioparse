@@ -505,7 +505,7 @@ def loserboard():
             return "Very bad request", 400
 
     params = gen_params(request.args)
-    start = "SELECT *, COUNT(report_id), SUM(ISK) FROM Killmails WHERE"
+    start = "SELECT *, COUNT(report_id), SUM(ISK) FROM Killmails WHERE victim_name NOT NULL AND victim_name != '' AND victim_name != '[2' AND victim_name != '[7' AND"
     end = "AND isk > 0 GROUP BY victim_name ORDER BY SUM(isk) DESC LIMIT 1000"
     query = gen_select(start, end, params)
 
