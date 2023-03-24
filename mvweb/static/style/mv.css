@@ -16,11 +16,11 @@ body {
 }
 
 .hugekill {
-    text-shadow:1px 1px 10px #fff, 1px 1px 10px violet;
+    text-shadow: 1px 1px 10px #fff, 1px 1px 10px violet;
 }
 
 .bigkill {
-    text-shadow:1px 1px 10px #fff;
+    text-shadow: 1px 1px 10px #fff;
 }
 
 .hisec .tablelink {
@@ -44,6 +44,16 @@ body {
     display: inline;
 }
 
+#timeplot {
+    text-align: center;
+    /* width: auto; */
+}
+
+
+.yaxistext {
+    font-size: 0.8em;
+}
+
 .corptooltip {
     display: none;
     position: absolute;
@@ -55,7 +65,7 @@ body {
     font-size: 12px;
     color: #fff;
     border-radius: 2px;
-    border:1px solid #fff;
+    border: 1px solid #fff;
 }
 
 .pilottooltip {
@@ -69,7 +79,7 @@ body {
     font-size: 12px;
     color: #fff;
     border-radius: 2px;
-    border:1px solid #fff;
+    border: 1px solid #fff;
 }
 
 .csvlink {
@@ -88,7 +98,7 @@ body {
 }
 
 @media (min-width: 1200px) {
-    .km_img_small { 
+    .km_img_small {
         width: 100px;
         height: 56px;
     }
@@ -99,7 +109,7 @@ body {
 }
 
 .sortable {
-    border-bottom:1px solid black;
+    border-bottom: 1px solid black;
     align-items: center;
     width: 100%;
 }
@@ -189,12 +199,12 @@ th[role=columnheader]:not(.no-sort):hover:after {
     opacity: 1;
 }
 
-form.filters{ 
+form.filters {
     margin-bottom: 0;
 }
 
 @media (min-width: 600px) {
-    form.filters{ 
+    form.filters {
         display: flex;
     }
 }
@@ -206,12 +216,12 @@ form.filters{
 }
 
 .filter {
-    align-items:center;
+    align-items: center;
     flex-direction: row;
     display: flex;
     flex: 1;
     padding: 2px;
-    text-align:center;
+    text-align: center;
     font-size: 10px;
     color: gray;
 }
@@ -236,7 +246,7 @@ form.filters{
         display: flex;
         flex: 1;
         padding: 2px;
-        text-align:center;
+        text-align: center;
     }
 }
 

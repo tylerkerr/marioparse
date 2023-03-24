@@ -16,6 +16,7 @@ import io
 import logging
 import base64
 import time
+import json
 
 
 app = Flask(__name__)
@@ -555,6 +556,16 @@ def bullying():
     return render_template('bullying.html', title="bullying olympics", bullies=bullies)
 
 
+@app.route('/timeline/pilot/<pilot>')
+def timeline_pilot(pilot):
+    return render_template('timeline.html', title="timeline", type="pilot", lookup=pilot)
+
+
+@app.route('/timeline/corp/<corp>')
+def timeline_corp(corp):
+    return render_template('timeline.html', title="timeline", type="corp", lookup=corp)
+
+
 @app.route('/solo')
 def solo():
     return redirect("/leaderboard?total_participants=1", code=302)
@@ -568,6 +579,60 @@ def api_snuggly_pilot(pilot):
 @app.route('/api/snuggly/corp/<corp>')
 def api_snuggly_corp(corp):
     return make_response(snuggly_string_corp(corp), 200)
+
+
+@app.route('/api/timeline/pilot/<pilot>')
+def api_timeline_pilot(pilot):
+    params = {'pilot': pilot}
+    kill_rows = db.session.execute(text('''
+                                    SELECT isk, victim_ship_type, timestamp, image_url
+                                    FROM Killmails
+                                    WHERE killer_name LIKE :pilot
+                                    ORDER BY timestamp
+    '''), params=params)
+    death_rows = db.session.execute(text('''
+                                    SELECT isk, victim_ship_type, timestamp, image_url
+                                    FROM Killmails
+                                    WHERE victim_name LIKE :pilot
+                                    ORDER BY timestamp
+    '''), params=params)
+    kills = [tuple(row) for row in kill_rows]
+    deaths = [(row[0] * -1, row[1], row[2], row[3]) for row in death_rows]
+    merge = sorted(kills + deaths, key = lambda x: x[2])
+    cur = 0
+    dataset = []
+    for kill in merge:
+        dataset.append({'date': int(kill[2]) * 1000, 'ship': kill[1], 'shipval': kill[0], 'isk': cur + kill[0], 'url': kill[3]})
+        cur = cur + kill[0]
+    result_json = json.dumps(dataset)
+    return make_response(result_json, 200)
+
+
+@app.route('/api/timeline/corp/<corp>')
+def api_timeline_corp(corp):
+    params = {'corp': corp}
+    kill_rows = db.session.execute(text('''
+                                    SELECT isk, victim_ship_type, timestamp, image_url
+                                    FROM Killmails
+                                    WHERE killer_corp LIKE :corp
+                                    ORDER BY timestamp
+    '''), params=params)
+    death_rows = db.session.execute(text('''
+                                    SELECT isk, victim_ship_type, timestamp, image_url
+                                    FROM Killmails
+                                    WHERE victim_corp LIKE :corp
+                                    ORDER BY timestamp
+    '''), params=params)
+    kills = [tuple(row) for row in kill_rows]
+    deaths = [(row[0] * -1, row[1], row[2], row[3]) for row in death_rows]
+    merge = sorted(kills + deaths, key = lambda x: x[2])
+    cur = 0
+    dataset = []
+    for kill in merge:
+        dataset.append({'date': int(kill[2]) * 1000, 'ship': kill[1], 'shipval': kill[0], 'isk': cur + kill[0], 'url': kill[3]})
+        cur = cur + kill[0]
+    result_json = json.dumps(dataset)
+    return make_response(result_json, 200)
 
 
 app.register_blueprint(routes)
