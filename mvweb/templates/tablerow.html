@@ -1,7 +1,7 @@
 <tr>
     <td{% if km['killer_corp'] is not none %} class="corpstat"{% endif %}>
         {%- if km['killer_corp'] is not none %}
-        <a href="/timeline/corp/{{ km['killer_corp'] }}" target="_blank"><img class='smallicon' src="/static/img/timeseries.png"></a>
+        <a href="/timeline/corp/{{ km['killer_corp'] }}"><img class='smallicon' src="/static/img/timeseries.png"></a>
         <a href="/search?killer_corp={{ km['killer_corp'] }}" class="tablelink corplink">
             {{ km['killer_corp'] }}
         </a>
@@ -11,7 +11,7 @@
     </td>
     <td class="nowrapname{% if km['killer_name'] is not none%} pilotstat{% endif %}">
         {%- if km['killer_name'] is not none  %}
-            <a href="/timeline/pilot/{{ km['killer_name']|urlify }}" target="_blank"><img class='smallicon' src="/static/img/dogtags.png"></a>
+            <a href="/timeline/pilot/{{ km['killer_name']|urlify }}"><img class='smallicon' src="/static/img/dogtags.png"></a>
             <a href="/search?killer_name={{ km['killer_name']|urlify }}" class="tablelink pilotlink">{{ km['killer_name'] }}</a>
             {%- if km['total_participants'] == 1 %}
                 <img src="/static/img/star.png" class="smallicon" title="solo kill">
@@ -32,7 +32,7 @@
     </td>
     <td{% if km['victim_corp'] is not none %} class="corpstat"{% endif %}>
         {%- if km['victim_corp'] is not none %}
-            <a href="/timeline/corp/{{ km['victim_corp'] }}" target="_blank"><img class='smallicon' src="/static/img/timeseries.png"></a>
+            <a href="/timeline/corp/{{ km['victim_corp'] }}"><img class='smallicon' src="/static/img/timeseries.png"></a>
             <a href="/search?victim_corp={{ km['victim_corp'] }}" class="tablelink corplink">
                 {{ km['victim_corp'] }}
             </a>
@@ -42,7 +42,7 @@
     </td>
     <td class="nowrapname{% if km['victim_name'] is not none%} pilotstat{% endif %}">
         {%- if km['victim_name'] is not none  %}
-            <a href="/timeline/pilot/{{ km['victim_name']|urlify }}" target="_blank"><img class='smallicon' src="/static/img/dogtags.png"></a>
+            <a href="/timeline/pilot/{{ km['victim_name']|urlify }}"><img class='smallicon' src="/static/img/dogtags.png"></a>
             <a href="/search?victim_name={{ km['victim_name']|urlify }}" class="tablelink pilotlink">
                 {{ km['victim_name'] }}
             </a>
