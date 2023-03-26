@@ -43,6 +43,7 @@
         {%- if request.args.get('killer_corp') %}
             <td{% if km['killer_corp'] is not none %} class="corpstat"{% endif %}>
                 {%- if km['killer_corp'] is not none %}
+                <a href="/timeline/corp/{{ km['killer_corp'] }}"><img class='smallicon' src="/static/img/timeseries.png"></a>
                 <a href="/search?killer_corp={{ km['killer_corp'] }}" class="tablelink corplink">
                     {{ km['killer_corp'] }}
                 </a>
@@ -53,8 +54,8 @@
         {% endif -%}
         <td class="nowrapname{% if km['killer_name'] is not none%} pilotstat{% endif %}">
             {%- if km['killer_name'] %}
-                <a href="https://echoes.mobi/killboard/view/player/{{ km['killer_name']|urlify }}/summary" target="_blank"><img class='smallicon' src="/static/img/dogtags.png"></a>
-            <a href="/search?killer_name={{ km['killer_name']|urlify }}" class="tablelink pilotlink">
+                <a href="/timeline/pilot/{{ km['killer_name']|urlify }}"><img class='smallicon' src="/static/img/dogtags.png"></a>
+                <a href="/search?killer_name={{ km['killer_name']|urlify }}" class="tablelink pilotlink">
                 {{ km['killer_name'] }}
             </a>
             <div class="pilottooltip">
@@ -66,6 +67,7 @@
         {% if request.args.get('victim_corp') %}
             <td{% if km['victim_corp'] is not none %} class="corpstat"{% endif %}>
                 {%- if km['victim_corp'] is not none %}
+                <a href="/timeline/corp/{{ km['victim_corp'] }}"><img class='smallicon' src="/static/img/timeseries.png"></a>
                 <a href="/search?victim_corp={{ km['victim_corp'] }}" class="tablelink corplink">
                     {{ km['victim_corp'] }}
                 </a>
@@ -77,7 +79,7 @@
         {% if request.args.get('victim_name') %}
             <td class="nowrapname{% if km['victim_name'] is not none%} pilotstat{% endif %}">
                 {%- if km['victim_name'] %}
-                    <a href="https://echoes.mobi/killboard/view/player/{{ km['victim_name']|urlify }}/summary" target="_blank"><img class='smallicon' src="/static/img/dogtags.png"></a>
+                    <a href="/timeline/pilot/{{ km['victim_name']|urlify }}"><img class='smallicon' src="/static/img/dogtags.png"></a>
                     <a href="/search?victim_name={{ km['victim_name']|urlify }}" class="tablelink pilotlink">{{ km['victim_name'] }}</a>
                     <div class="pilottooltip">
                     </div>

@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block content %}
+<script src="https://d3js.org/d3.v4.js"></script>
+<div id="timeplot"></div>
+<script>
+    const widthVal = 800
+    const heightVal = 400
+    const margin = { top: 30, right: 30, bottom: 30, left: 80 }
+    const width = widthVal - margin.left - margin.right;
+    const height = heightVal - margin.top - margin.bottom;
+
+    var svg = d3.select("#timeplot")
+        .append("svg")
+        .attr("viewBox", `0 0 ${widthVal} ${heightVal}`)
+        .append("g")
+        .style('fill', 'darkOrange')
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    d3.csv("/static/alltime_ships.csv", function (data) {
+        var keys = data.columns.slice(1)
+
+        var x = d3.scaleTime()
+            .domain(d3.extent(data, function (d) { return d3.timeParse("%Y-%m-%d")(d.day); }))
+            .range([0, width]);
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x).ticks(5));
+
+        var y = d3.scaleLinear()
+            .domain([0, 2000000000000])
+            .range([height, 0]);
+        svg.append("g")
+            .call(d3.axisLeft(y));
+
+        var color = d3.scaleOrdinal()
+            .domain(keys)
+            .range(['#24e576', '#2468e5', '#24dee5', '#9fe524', '#ffa800', '#ce0000', '#ff00cc', '#7800a0', '#76ff40', '#08a400', '#4600e9', '#d8d8d8', '#383838', '#171717'])
+
+        var stackedData = d3.stack()
+            .keys(keys)
+            (data)
+
+        var yticks = d3.selectAll(".tick text");
+        yticks.attr("class", "yaxistext").style('fill', '#dddddd')
+
+        svg
+            .selectAll("mylayers")
+            .data(stackedData)
+            .enter()
+            .append("path")
+            .style("fill", function (d) { return color(d.key); })
+            .attr("d", d3.area()
+                .x(function (d, i) { return x(d3.timeParse("%Y-%m-%d")(d.data.day)); })
+                .y0(function (d) { return y(d[0]); })
+                .y1(function (d) { return y(d[1]); })
+
+            )
+    })
+
+</script>
+{% endblock %}

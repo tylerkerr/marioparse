@@ -9,9 +9,10 @@ from datetime import datetime, timezone
 from dateutil import parser
 from glob import glob
 from hashlib import md5
-from csv import writer, reader
+from csv import writer, reader, DictWriter
 from re import sub
 from math import copysign
+from datetime import datetime
 import io
 import logging
 import base64
@@ -53,7 +54,7 @@ class Killmails(db.Model):
     victim_total_damage_received = db.Column(db.Integer)
     total_participants = db.Column(db.Integer)
     killer_ship_type = db.Column(db.String)
-    killer_ship_category =db.Column(db.String)
+    killer_ship_category = db.Column(db.String)
     timestamp = db.Column(db.Integer)
 
     def __repr__(self):
@@ -75,7 +76,7 @@ else:
 
 mutable_static = glob(path.join(app.root_path, 'static/style', '*.css')) + \
     glob(path.join(app.root_path, 'static/script', '*.js'))
-    
+
 hash_obj = md5(open(mutable_static[0], 'rb').read())
 
 for static_file in mutable_static[1:]:
@@ -88,13 +89,14 @@ app.config.from_pyfile(path.join(app.root_path, 'app.cfg'))
 routes = Blueprint('views', __name__)
 
 with app.app_context():
-    valid_columns = [c[1] for c in db.session.execute(text('pragma table_info(Killmails)'))]
+    valid_columns = [c[1] for c in db.session.execute(
+        text('pragma table_info(Killmails)'))]
     valid_columns.append('date_start')
     valid_columns.append('date_end')
     valid_columns.append('csv')
 
 
-### utilities
+# utilities
 
 
 def date_to_timestamp(datestring, end=False):
@@ -106,9 +108,11 @@ def date_to_timestamp(datestring, end=False):
         print(f"[!] bad date: '{datestring}'")
         return None
     if end:
-        timestamp = datetime.combine(date_obj, date_obj.max.time(), tzinfo=timezone.utc).timestamp()
+        timestamp = datetime.combine(
+            date_obj, date_obj.max.time(), tzinfo=timezone.utc).timestamp()
     else:
-        timestamp = datetime.combine(date_obj, date_obj.min.time(), tzinfo=timezone.utc).timestamp()
+        timestamp = datetime.combine(
+            date_obj, date_obj.min.time(), tzinfo=timezone.utc).timestamp()
     return int(timestamp)
 
 
@@ -213,27 +217,27 @@ def gen_params(request_args):
 
     if timestamp_start and timestamp_end and timestamp_start > timestamp_end:
         timestamp_start, timestamp_end = None, None
-    
+
     params = {
-              'report_id': request_args.get('report_id'),
-              'killer_corp': prep_param(request_args.get('killer_corp')),
-              'killer_name': prep_param(request_args.get('killer_name'), fuzzy=True),
-              'minimum_isk': parse_isk_total(request_args.get('isk')),
-              'victim_ship_type': prep_param(request_args.get('victim_ship_type'), fuzzy=True),
-              'victim_ship_category': prep_param(request_args.get('victim_ship_category')),
-              'victim_name': prep_param(request_args.get('victim_name'), fuzzy=True),
-              'victim_corp': prep_param(request_args.get('victim_corp')),
-              'system': prep_param(request_args.get('system'), fuzzy=True),
-              'constellation': prep_param(request_args.get('constellation'), fuzzy=True),
-              'region': prep_param(request_args.get('region'), fuzzy=True),
-              'victim_total_damage_received': request_args.get('victim_total_damage_received'),
-              'max_total_participants': request_args.get('total_participants'),
-              'killer_ship_type': prep_param(request_args.get('killer_ship_type'), fuzzy=True),
-              'killer_ship_category': prep_param(request_args.get('killer_ship_category')),
-              'timestamp': request_args.get('timestamp'),
-              'timestamp_start': timestamp_start,
-              'timestamp_end': timestamp_end
-              }
+        'report_id': request_args.get('report_id'),
+        'killer_corp': prep_param(request_args.get('killer_corp')),
+        'killer_name': prep_param(request_args.get('killer_name'), fuzzy=True),
+        'minimum_isk': parse_isk_total(request_args.get('isk')),
+        'victim_ship_type': prep_param(request_args.get('victim_ship_type'), fuzzy=True),
+        'victim_ship_category': prep_param(request_args.get('victim_ship_category')),
+        'victim_name': prep_param(request_args.get('victim_name'), fuzzy=True),
+        'victim_corp': prep_param(request_args.get('victim_corp')),
+        'system': prep_param(request_args.get('system'), fuzzy=True),
+        'constellation': prep_param(request_args.get('constellation'), fuzzy=True),
+        'region': prep_param(request_args.get('region'), fuzzy=True),
+        'victim_total_damage_received': request_args.get('victim_total_damage_received'),
+        'max_total_participants': request_args.get('total_participants'),
+        'killer_ship_type': prep_param(request_args.get('killer_ship_type'), fuzzy=True),
+        'killer_ship_category': prep_param(request_args.get('killer_ship_category')),
+        'timestamp': request_args.get('timestamp'),
+        'timestamp_start': timestamp_start,
+        'timestamp_end': timestamp_end
+    }
 
     return params
 
@@ -243,6 +247,7 @@ def prep_select(param, value):
         return f'lower({param}) IN :{param}'
     else:
         return f'{param} LIKE :{param}'
+
 
 def gen_select(start, end, params):
     select = []
@@ -254,7 +259,8 @@ def gen_select(start, end, params):
             elif param == 'minimum_isk':
                 select.append('isk >= :minimum_isk')
             elif param == 'victim_total_damage_received':
-                select.append('victim_total_damage_received >= :victim_total_damage_received')
+                select.append(
+                    'victim_total_damage_received >= :victim_total_damage_received')
             elif param == 'max_total_participants':
                 select.append('total_participants <= :max_total_participants')
             elif param == 'timestamp_start':
@@ -330,6 +336,7 @@ def snuggly_check_pilot(pilot):
 
     return snuggly
 
+
 def snuggly_string(snuggly):
     if snuggly == 0:
         stringout = '0'
@@ -343,6 +350,8 @@ def snuggly_string(snuggly):
 
 
 snuggly_corp_memo = {}
+
+
 def snuggly_string_corp(corp):
     if corp in snuggly_corp_memo:
         return snuggly_corp_memo[corp]
@@ -351,14 +360,36 @@ def snuggly_string_corp(corp):
 
 
 snuggly_pilot_memo = {}
+
+
 def snuggly_string_pilot(pilot):
     if pilot in snuggly_pilot_memo:
         return snuggly_pilot_memo[pilot]
     snuggly_pilot_memo[pilot] = snuggly_string(snuggly_check_pilot(pilot))
     return snuggly_pilot_memo[pilot]
-    
 
-### filters
+
+main_classes = ['Shuttle', 'Frigate', 'Destroyer', 'Cruiser', 'Battlecruiser', 'Battleship',
+                'Carrier', 'Dreadnought', 'Freighter', 'Jump Freighter', 'Force Auxiliary',
+                'Industrial Ship']
+alt_classes = ['Structure', '-']
+all_classes = main_classes + alt_classes
+
+
+def get_alltime_class(ship_class):
+    if ship_class == None:
+        return '-'
+    if ship_class in main_classes:
+        return ship_class
+    elif ship_class == 'Command Destroyer':
+        return 'Destroyer'
+    elif ship_class == 'Industrial Command Ship':
+        return 'Industrial Ship'
+    else:
+        return 'Structure'
+
+
+# filters
 
 @app.template_filter('urlify')
 def urlify(text):
@@ -380,12 +411,12 @@ def is_faction(shipname):
     if not shipname:
         return False
     if shipname.lower() in ['garmur', 'orthrus', 'barghest',
-                    'astero', 'stratios', 'nestor',
-                    'succubus', 'phantasm', 'nightmare',
-                    'worm', 'gila', 'rattlesnake',
-                    'daredevil', 'vigilant', 'vindicator',
-                    'dramiel', 'cynabal', 'machariel',
-                    'cruor', 'ashimmu', 'bhaalgorn']:
+                            'astero', 'stratios', 'nestor',
+                            'succubus', 'phantasm', 'nightmare',
+                            'worm', 'gila', 'rattlesnake',
+                            'daredevil', 'vigilant', 'vindicator',
+                            'dramiel', 'cynabal', 'machariel',
+                            'cruor', 'ashimmu', 'bhaalgorn']:
         return True
     return False
 
@@ -423,7 +454,7 @@ def before_request():
     g.request_time = lambda: "%.5fs" % (time.time() - g.request_start_time)
 
 
-### routes
+# routes
 
 
 @routes.route('/')
@@ -442,17 +473,19 @@ def index():
     oldest_time = db.session.execute(text('''SELECT last_refreshed 
                                                   FROM Months
                                                   ORDER BY month ASC
-                                                  LIMIT 1''')).all()[0][0]                                        
+                                                  LIMIT 1''')).all()[0][0]
 
-    update_seconds_old = (datetime.now(timezone.utc) - parser.isoparse(update_time)).total_seconds()
-    update_minutes_old = int(divmod(update_seconds_old , 60)[0])
+    update_seconds_old = (datetime.now(timezone.utc) -
+                          parser.isoparse(update_time)).total_seconds()
+    update_minutes_old = int(divmod(update_seconds_old, 60)[0])
 
-    oldest_seconds_old = (datetime.now(timezone.utc) - parser.isoparse(oldest_time)).total_seconds()
-    oldest_hours_old = int(divmod(oldest_seconds_old , 3600)[0])
+    oldest_seconds_old = (datetime.now(timezone.utc) -
+                          parser.isoparse(oldest_time)).total_seconds()
+    oldest_hours_old = int(divmod(oldest_seconds_old, 3600)[0])
 
     killmails = latest.all()
     csv = make_csv(killmails)
-    
+
     return render_template('index.html', kms=killmails, csv=csv, update_age_minutes=update_minutes_old, oldest_hours=oldest_hours_old, title="latest")
 
 
@@ -461,7 +494,7 @@ def search():
     for arg in request.args:
         if arg not in valid_columns:
             return "Very bad request", 400
-    
+
     params = gen_params(request.args)
     start = "SELECT * FROM Killmails WHERE"
     end = "ORDER BY isk DESC LIMIT 10000"
@@ -473,7 +506,8 @@ def search():
     if request.args.get("csv", default=False, type=bool):
         csv = make_csv(killmails)
         datestamp = datetime.now().strftime("%Y-%m-%d")
-        filename = '&'.join([f"{key}={val}" for key,val in (request.args.items()) if key != 'csv']) + f'-{datestamp}.csv'
+        filename = '&'.join([f"{key}={val}" for key, val in (
+            request.args.items()) if key != 'csv']) + f'-{datestamp}.csv'
         return send_file(csv, download_name=filename, as_attachment=True)
 
     isk_total = sum(km._mapping['isk'] for km in killmails)
@@ -539,7 +573,8 @@ def positivity():
             score[corp[0]] = corp[1] * -1
         else:
             score[corp[0]] = score[corp[0]] - corp[1]
-    sorted_score = dict(sorted(score.items(), key=lambda item: item[1], reverse=True))
+    sorted_score = dict(
+        sorted(score.items(), key=lambda item: item[1], reverse=True))
     return render_template('positivity.html', title="positivity", score=sorted_score)
 
 
@@ -564,6 +599,11 @@ def timeline_pilot(pilot):
 @app.route('/timeline/corp/<corp>')
 def timeline_corp(corp):
     return render_template('timeline.html', title="timeline", type="corp", lookup=corp)
+
+
+@app.route('/alltime')
+def alltime():
+    return render_template('alltime.html', title="alltime")
 
 
 @app.route('/solo')
@@ -598,11 +638,12 @@ def api_timeline_pilot(pilot):
     '''), params=params)
     kills = [tuple(row) for row in kill_rows]
     deaths = [(row[0] * -1, row[1], row[2], row[3]) for row in death_rows]
-    merge = sorted(kills + deaths, key = lambda x: x[2])
+    merge = sorted(kills + deaths, key=lambda x: x[2])
     cur = 0
     dataset = []
     for kill in merge:
-        dataset.append({'date': int(kill[2]) * 1000, 'ship': kill[1], 'shipval': kill[0], 'isk': cur + kill[0], 'url': kill[3]})
+        dataset.append({'date': int(kill[2]) * 1000, 'ship': kill[1],
+                       'shipval': kill[0], 'isk': cur + kill[0], 'url': kill[3]})
         cur = cur + kill[0]
     result_json = json.dumps(dataset)
     return make_response(result_json, 200)
@@ -625,14 +666,110 @@ def api_timeline_corp(corp):
     '''), params=params)
     kills = [tuple(row) for row in kill_rows]
     deaths = [(row[0] * -1, row[1], row[2], row[3]) for row in death_rows]
-    merge = sorted(kills + deaths, key = lambda x: x[2])
+    merge = sorted(kills + deaths, key=lambda x: x[2])
     cur = 0
     dataset = []
     for kill in merge:
-        dataset.append({'date': int(kill[2]) * 1000, 'ship': kill[1], 'shipval': kill[0], 'isk': cur + kill[0], 'url': kill[3]})
+        dataset.append({'date': int(kill[2]) * 1000, 'ship': kill[1],
+                       'shipval': kill[0], 'isk': cur + kill[0], 'url': kill[3]})
         cur = cur + kill[0]
     result_json = json.dumps(dataset)
     return make_response(result_json, 200)
+
+
+@app.route('/api/alltime')
+def api_alltime():
+    kill_rows = db.session.execute(text('''
+                                    SELECT isk, timestamp
+                                    FROM Killmails
+                                    ORDER BY timestamp
+    '''))
+    kills = kill_rows.all()
+    kill_days = {}
+    for row in kills:
+        day = datetime.utcfromtimestamp(
+            row._mapping['timestamp']).strftime("%Y-%m-%d")
+        if day in kill_days:
+            kill_days[day] = kill_days[day] + row._mapping['isk']
+        else:
+            kill_days[day] = row._mapping['isk']
+    return make_response(json.dumps(kill_days), 200)
+
+
+@app.route('/api/alltime_ships')
+def api_alltime_ships():
+    kill_rows = db.session.execute(text('''
+                                    SELECT isk, timestamp, victim_ship_category
+                                    FROM Killmails
+                                    ORDER BY timestamp
+    '''))
+    kills = kill_rows.all()
+    kill_days = {}
+    for row in kills:
+        day = datetime.utcfromtimestamp(
+            row._mapping['timestamp']).strftime("%Y-%m-%d")
+        isk = row._mapping['isk']
+        ship_class = get_alltime_class(row._mapping['victim_ship_category'])
+        if day in kill_days:
+            if ship_class in kill_days[day]:
+                kill_days[day][ship_class] = kill_days[day][ship_class] + isk
+            else:
+                kill_days[day][ship_class] = isk
+        else:
+            kill_days[day] = {}
+            kill_days[day][ship_class] = isk
+    kills_flat = []
+    for day in kill_days:
+        flat = {}
+        flat['day'] = day
+        for ship_class in kill_days[day]:
+            flat[ship_class] = kill_days[day][ship_class]
+        for c in all_classes:
+            if not c in flat:
+                flat[c] = 0
+        kills_flat.append(flat)
+    return make_response(json.dumps(kills_flat), 200)
+
+@app.route('/api/alltime_ships_csv')
+def api_alltime_ships_csv():
+    kill_rows = db.session.execute(text('''
+                                    SELECT isk, timestamp, victim_ship_category
+                                    FROM Killmails
+                                    ORDER BY timestamp
+    '''))
+    kills = kill_rows.all()
+    kill_days = {}
+    csv = io.StringIO()
+    w = DictWriter(csv, fieldnames=all_classes)
+    for row in kills:
+        day = datetime.utcfromtimestamp(
+            row._mapping['timestamp']).strftime("%Y-%m-%d")
+        isk = row._mapping['isk']
+        ship_class = get_alltime_class(row._mapping['victim_ship_category'])
+        if day in kill_days:
+            if ship_class in kill_days[day]:
+                kill_days[day][ship_class] = kill_days[day][ship_class] + isk
+            else:
+                kill_days[day][ship_class] = isk
+        else:
+            kill_days[day] = {}
+            kill_days[day][ship_class] = isk
+
+    print(all_classes)
+    csv = io.StringIO()
+    w = DictWriter(csv, fieldnames=['day'] + all_classes)
+    w.writeheader()
+    for day in kill_days:
+        row = kill_days[day]
+        row['day'] = day
+        for c in all_classes:
+            if not c in row:
+                row[c] = 0
+        w.writerow(row)
+
+    return make_response(csv.getvalue(), 200)
+        
+
 
 
 app.register_blueprint(routes)
