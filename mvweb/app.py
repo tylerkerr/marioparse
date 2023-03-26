@@ -541,7 +541,6 @@ def top_week():
     return render_template('top.html', period='week', kms=killmails, csv=csv, update_age_minutes=get_db_age_latest(), oldest_hours=get_db_age_oldest(), title="top weekly")
 
 
-
 @routes.route('/top/month')
 def top_month():
     now = int(datetime.now(timezone.utc).timestamp())
@@ -561,7 +560,6 @@ def top_month():
         csv = None
 
     return render_template('top.html', period='month', kms=killmails, csv=csv, update_age_minutes=get_db_age_latest(), oldest_hours=get_db_age_oldest(), title="top monthly")
-
 
 
 @app.route('/search', methods=['GET'])
@@ -676,6 +674,16 @@ def timeline_corp(corp):
     return render_template('timeline.html', title="timeline", type="corp", lookup=corp)
 
 
+@app.route('/timeline/shipsonly/pilot/<pilot>')
+def timeline_pilot_shipsonly(pilot):
+    return render_template('timeline.html', title="timeline", type="shipsonly/pilot", lookup=pilot)
+
+
+@app.route('/timeline/shipsonly/corp/<corp>')
+def timeline_corp_shipsonly(corp):
+    return render_template('timeline.html', title="timeline", type="shipsonly/corp", lookup=corp)
+
+
 @app.route('/alltime')
 def alltime():
     return render_template('alltime.html', title="alltime")
@@ -745,6 +753,73 @@ def api_timeline_corp(corp):
     cur = 0
     dataset = []
     for kill in merge:
+        dataset.append({'date': int(kill[2]) * 1000, 'ship': kill[1],
+                       'shipval': kill[0], 'isk': cur + kill[0], 'url': kill[3]})
+        cur = cur + kill[0]
+    result_json = json.dumps(dataset)
+    return make_response(result_json, 200)
+
+
+structure_classes = ['Capsuleer Outpost', 'Corporation Outpost I',
+                     'Corporation Outpost II', 'Ansiblex Stargate', 'Analytical Computer',
+                     'Anomaly Observation Array', 'Base Detection Array', 'Bounty Management Center',
+                     'Cynosural Beacon Tower', 'Cynosural Jammer Tower', 'Insurance Office', 'Pirate Detection Array',
+                     'Space Lab', 'Tax Center']
+
+
+@app.route('/api/timeline/shipsonly/pilot/<pilot>')
+def api_timeline_shipsonly_pilot(pilot):
+    params = {'pilot': pilot}
+    kill_rows = db.session.execute(text('''
+                                    SELECT isk, victim_ship_type, timestamp, image_url
+                                    FROM Killmails
+                                    WHERE killer_name LIKE :pilot
+                                    ORDER BY timestamp
+    '''), params=params)
+    death_rows = db.session.execute(text('''
+                                    SELECT isk, victim_ship_type, timestamp, image_url
+                                    FROM Killmails
+                                    WHERE victim_name LIKE :pilot
+                                    ORDER BY timestamp
+    '''), params=params)
+    kills = [tuple(row) for row in kill_rows]
+    deaths = [(row[0] * -1, row[1], row[2], row[3]) for row in death_rows]
+    merge = sorted(kills + deaths, key=lambda x: x[2])
+    cur = 0
+    dataset = []
+    for kill in merge:
+        if kill[1] in structure_classes:
+            continue
+        dataset.append({'date': int(kill[2]) * 1000, 'ship': kill[1],
+                       'shipval': kill[0], 'isk': cur + kill[0], 'url': kill[3]})
+        cur = cur + kill[0]
+    result_json = json.dumps(dataset)
+    return make_response(result_json, 200)
+
+
+@app.route('/api/timeline/shipsonly/corp/<corp>')
+def api_timeline_shipsonly_corp(corp):
+    params = {'corp': corp}
+    kill_rows = db.session.execute(text('''
+                                    SELECT isk, victim_ship_type, timestamp, image_url
+                                    FROM Killmails
+                                    WHERE killer_corp LIKE :corp
+                                    ORDER BY timestamp
+    '''), params=params)
+    death_rows = db.session.execute(text('''
+                                    SELECT isk, victim_ship_type, timestamp, image_url
+                                    FROM Killmails
+                                    WHERE victim_corp LIKE :corp
+                                    ORDER BY timestamp
+    '''), params=params)
+    kills = [tuple(row) for row in kill_rows]
+    deaths = [(row[0] * -1, row[1], row[2], row[3]) for row in death_rows]
+    merge = sorted(kills + deaths, key=lambda x: x[2])
+    cur = 0
+    dataset = []
+    for kill in merge:
+        if kill[1] in structure_classes:
+            continue
         dataset.append({'date': int(kill[2]) * 1000, 'ship': kill[1],
                        'shipval': kill[0], 'isk': cur + kill[0], 'url': kill[3]})
         cur = cur + kill[0]
