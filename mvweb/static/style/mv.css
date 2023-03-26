@@ -233,6 +233,10 @@ form.filters {
     text-align: right;
 }
 
+.sololabel {
+    margin-left: -32px;
+}
+
 .dateinput {
     display: inline-block;
 }
