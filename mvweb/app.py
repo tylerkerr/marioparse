@@ -35,6 +35,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+
 class Killmails(db.Model):
     id = db.Column(db.String, primary_key=True, nullable=False, unique=True)
     report_id = db.Column(db.String, nullable=False)
@@ -389,7 +390,34 @@ def get_alltime_class(ship_class):
         return 'Structure'
 
 
+def get_db_age_latest():
+
+    update_time = db.session.execute(text('''SELECT last_refreshed
+                                                  FROM Months
+                                                  ORDER BY month DESC
+                                                  LIMIT 1''')).all()[0][0]
+    update_seconds_old = (datetime.now(timezone.utc) -
+                          parser.isoparse(update_time)).total_seconds()
+    update_minutes_old = int(divmod(update_seconds_old, 60)[0])
+
+    return update_minutes_old
+
+
+def get_db_age_oldest():
+
+    oldest_time = db.session.execute(text('''SELECT last_refreshed
+                                                  FROM Months
+                                                  ORDER BY month ASC
+                                                  LIMIT 1''')).all()[0][0]
+    oldest_seconds_old = (datetime.now(timezone.utc) -
+                          parser.isoparse(oldest_time)).total_seconds()
+    oldest_hours_old = int(divmod(oldest_seconds_old, 3600)[0])
+
+    return oldest_hours_old
+
+
 # filters
+
 
 @app.template_filter('urlify')
 def urlify(text):
@@ -465,28 +493,75 @@ def index():
                                     LIMIT 50
                                   '''))
 
-    update_time = db.session.execute(text('''SELECT last_refreshed 
-                                                  FROM Months
-                                                  ORDER BY month DESC
-                                                  LIMIT 1''')).all()[0][0]
-
-    oldest_time = db.session.execute(text('''SELECT last_refreshed 
-                                                  FROM Months
-                                                  ORDER BY month ASC
-                                                  LIMIT 1''')).all()[0][0]
-
-    update_seconds_old = (datetime.now(timezone.utc) -
-                          parser.isoparse(update_time)).total_seconds()
-    update_minutes_old = int(divmod(update_seconds_old, 60)[0])
-
-    oldest_seconds_old = (datetime.now(timezone.utc) -
-                          parser.isoparse(oldest_time)).total_seconds()
-    oldest_hours_old = int(divmod(oldest_seconds_old, 3600)[0])
-
     killmails = latest.all()
     csv = make_csv(killmails)
 
-    return render_template('index.html', kms=killmails, csv=csv, update_age_minutes=update_minutes_old, oldest_hours=oldest_hours_old, title="latest")
+    return render_template('index.html', kms=killmails, csv=csv, update_age_minutes=get_db_age_latest(), oldest_hours=get_db_age_oldest(), title="latest")
+
+
+@routes.route('/top/day')
+def top_day():
+    now = int(datetime.now(timezone.utc).timestamp())
+    one_day_ago = now - 24 * 60 * 60
+    params = {'one_day_ago': one_day_ago}
+    latest = db.session.execute(text('''
+                                    SELECT * FROM Killmails
+                                    WHERE timestamp > :one_day_ago
+                                    ORDER BY isk DESC
+                                    LIMIT 100
+                                  '''), params)
+
+    killmails = latest.all()
+    if len(killmails) > 0:
+        csv = make_csv(killmails)
+    else:
+        csv = None
+
+    return render_template('top.html', period='day', kms=killmails, csv=csv, update_age_minutes=get_db_age_latest(), oldest_hours=get_db_age_oldest(), title="top daily")
+
+
+@routes.route('/top/week')
+def top_week():
+    now = int(datetime.now(timezone.utc).timestamp())
+    one_week_ago = now - 7 * 24 * 60 * 60
+    params = {'one_week_ago': one_week_ago}
+    latest = db.session.execute(text('''
+                                    SELECT * FROM Killmails
+                                    WHERE timestamp > :one_week_ago
+                                    ORDER BY isk DESC
+                                    LIMIT 100
+                                  '''), params)
+
+    killmails = latest.all()
+    if len(killmails) > 0:
+        csv = make_csv(killmails)
+    else:
+        csv = None
+
+    return render_template('top.html', period='week', kms=killmails, csv=csv, update_age_minutes=get_db_age_latest(), oldest_hours=get_db_age_oldest(), title="top weekly")
+
+
+
+@routes.route('/top/month')
+def top_month():
+    now = int(datetime.now(timezone.utc).timestamp())
+    one_month_ago = now - 30 * 24 * 60 * 60
+    params = {'one_month_ago': one_month_ago}
+    latest = db.session.execute(text('''
+                                    SELECT * FROM Killmails
+                                    WHERE timestamp > :one_month_ago
+                                    ORDER BY isk DESC
+                                    LIMIT 100
+                                  '''), params)
+
+    killmails = latest.all()
+    if len(killmails) > 0:
+        csv = make_csv(killmails)
+    else:
+        csv = None
+
+    return render_template('top.html', period='month', kms=killmails, csv=csv, update_age_minutes=get_db_age_latest(), oldest_hours=get_db_age_oldest(), title="top monthly")
+
 
 
 @app.route('/search', methods=['GET'])
@@ -730,6 +805,7 @@ def api_alltime_ships():
         kills_flat.append(flat)
     return make_response(json.dumps(kills_flat), 200)
 
+
 @app.route('/api/alltime_ships_csv')
 def api_alltime_ships_csv():
     kill_rows = db.session.execute(text('''
@@ -768,8 +844,6 @@ def api_alltime_ships_csv():
         w.writerow(row)
 
     return make_response(csv.getvalue(), 200)
-        
-
 
 
 app.register_blueprint(routes)

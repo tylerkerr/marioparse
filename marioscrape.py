@@ -2,6 +2,7 @@ import sqlite3
 import os
 import json
 import pandas
+import sys
 from requests import get
 from datetime import datetime, timezone
 from dateutil import parser
@@ -240,11 +241,7 @@ def download_export(start, end):
         return False
 
 
-def download_month(month):
-    start_datetime = parser.isoparse(month).replace(day=1)
-    start_date = start_datetime.strftime("%m-%d-%Y")
-    end_datetime = (start_datetime + relativedelta(months=1))
-    end_date = end_datetime.strftime("%m-%d-%Y")
+def download_kills(start_date, end_date):
     km_json = json.loads(download_export(start_date, end_date))
     print(f"[+] got month {month} with {len(km_json)} killmails")
     stamped_kms = []
@@ -288,16 +285,38 @@ if __name__ == "__main__":
 
     # month_json = download_month('2022-09')
     # write_km_dict(month_json)
+    if sys.argv[1] == 'all' or len(sys.argv) == 1:
+        for month in get_all_months():
+            if not is_month_current(month):
+                print(f"[-] downloading month {month}")
+                start_datetime = parser.isoparse(month).replace(day=1)
+                start_date = start_datetime.strftime("%m-%d-%Y")
+                end_datetime = (start_datetime + relativedelta(months=1))
+                end_date = end_datetime.strftime("%m-%d-%Y")
+                month_json = download_kills(start_date, end_date)
+                write_km_dict(month_json)
+                update_month_status(month)
+                sleep(5) # be nice to mario
+            else:
+                print(f"[-] skipping month {month}, already have it")
+    elif sys.argv[1] == 'month':
+        month = get_this_month()
+        start_datetime = parser.isoparse(month).replace(day=1)
+        start_date = start_datetime.strftime("%m-%d-%Y")
+        end_datetime = (start_datetime + relativedelta(months=1))
+        end_date = end_datetime.strftime("%m-%d-%Y")
+        print(f"[-] downloading month {month}")
+        month_json = download_kills(start_date, end_date)
+        write_km_dict(month_json)
+        update_month_status(month)
+    elif sys.argv[1] == 'day':
+        month = get_this_month()
+        day = get_today_american()
+        print(f"[-] downloading day {day}")
+        day_json = download_kills(day, day)
+        write_km_dict(day_json)
+        update_month_status(month)
 
-    for month in get_all_months():
-        if not is_month_current(month):
-            print(f"[-] downloading month {month}")
-            month_json = download_month(month)
-            write_km_dict(month_json)
-            update_month_status(month)
-            sleep(5) # be nice to mario
-        else:
-            print(f"[-] skipping month {month}, already have it")
 
     c.close()
     conn.close()
