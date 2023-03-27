@@ -424,6 +424,11 @@ def urlify(text):
     return text.replace('+', '%2B').replace('*', '%2A') if text else None
 
 
+@app.template_filter('removeshipsonly')
+def removeshipsonly(text):
+    return text.replace('shipsonly/', '') if text else None
+
+
 @app.template_filter('get_system_sec')
 def get_system_sec(system):
     if system in sec_lookup:
@@ -459,6 +464,7 @@ def is_faction_possible(shipclass):
 
 
 app.jinja_env.filters['urlify'] = urlify
+app.jinja_env.filters['removeshipsonly'] = removeshipsonly
 app.jinja_env.filters['get_system_sec'] = get_system_sec
 app.jinja_env.filters['is_faction'] = is_faction
 app.jinja_env.filters['is_faction_possible'] = is_faction_possible

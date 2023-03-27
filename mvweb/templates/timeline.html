@@ -1,6 +1,14 @@
 {% extends "layout.html" %}
 {% block content %}
 <script src="https://d3js.org/d3.v6.js"></script>
+<p class="timelinetitle">{{ type|removeshipsonly }} history for {{ lookup }} {%- if 'shipsonly' in type %} (ships only){% endif -%}</p>
+{%- if 'shipsonly' in type %}
+<p class="timelinecontrol"><a href="/timeline/{{ type|removeshipsonly }}/{{ lookup }}" class="timelinelink">change to all kills</a></p>
+{% else %}
+<p class="timelinecontrol"><a href="/timeline/shipsonly/{{ type }}/{{ lookup }}" class="timelinelink">change to ships only</a></p>
+{% endif -%}
+
+
 <div id="timeplot"></div>
 <style>
     /* set the CSS */
@@ -53,9 +61,9 @@
             return { date: d3.timeParse("%s")(d.date), ship: d.ship, shipval: d.shipval, isk: d.isk, url: d.url }
         }).then(
             function (data) {
-                const x = d3.scaleTime()
-                    .domain(d3.extent(data, function (d) { return d.date; }))
-                    .range([0, width]);
+                // const x = d3.scaleTime()
+                //     .domain(d3.extent(data, function (d) { return d.date; }))
+                //     .range([0, width]);
 
                 const xScale = d3
                     .scaleTime()
@@ -67,11 +75,13 @@
                     .range([height, 0])
                     .domain([d3.min(data, d => d.isk), d3.max(data, d => +d.isk)])
 
-                svg.append("g")
+                var xAxis = svg.append("g")
+                    .attr("class", "x-axis")
                     .attr("transform", `translate(0,${height})`)
                     .call(d3.axisBottom(xScale));
 
-                svg.append("g")
+                var yAxis = svg.append("g")
+                    .attr("class", "y-axis")
                     // .classed("yaxistext", true)
                     .attr("transform", `translate(0, 0)`)
                     .call(d3.axisLeft(yScale));
@@ -79,17 +89,28 @@
                 var yticks = d3.selectAll(".tick text");
                 yticks.attr("class", "yaxistext")
 
-                svg.append("path")
+                var line = d3.line()
+                    .x(function (d) { return xScale(d.date) })
+                    .y(function (d) { return yScale(d.isk) })
+
+
+                var defs = svg.append("defs").append("clipPath")
+                    .attr("id", "clip")
+                    .append("rect")
+                    .attr("x", margin.left)
+                    .attr("width", width - margin.right)
+                    .attr("height", height);
+
+                var path = svg.append("path")
                     .datum(data)
                     .attr("fill", "none")
                     .attr("stroke", "#888888")
                     .attr("stroke-width", strokeWidth)
-                    .attr("d", d3.line()
-                        .x(function (d) { return xScale(d.date) })
-                        .y(function (d) { return yScale(d.isk) })
-                    )
+                    .attr("d", line)
 
-                svg.selectAll("dot")
+
+
+                var dots = svg.selectAll("dot")
                     .data(data)
                     // .enter().append("a").attr("xlink:href", function (d) { return d.url; }).append("rect")
                     .enter().append("a").attr("xlink:href", function (d) { return d.url; }).append("circle")
@@ -99,8 +120,8 @@
                     .attr('fill', function (d) { if (d.shipval >= 0) { return "white" } else { return "black" } })
                     // .attr("x", function (d) { return xScale(d.date) - getKmRadius(d.shipval) / 2; })
                     // .attr("y", function (d) { return yScale(d.isk) - getKmRadius(d.shipval) / 2; })
-                    .attr("cx", function (d) { return xScale(d.date)})
-                    .attr("cy", function (d) { return yScale(d.isk)})
+                    .attr("cx", function (d) { return xScale(d.date) })
+                    .attr("cy", function (d) { return yScale(d.isk) })
                     .on("mouseover", function (event, d) {
                         div.style("opacity", .9);
                         div.html(d3.timeFormat("%Y-%m-%d")(d.date) + ((d.ship !== null) ? "<br/>" + d.ship : '') + "<br/>killmail: " + d.shipval.toLocaleString() + "<br/>total: " + d.isk.toLocaleString())
