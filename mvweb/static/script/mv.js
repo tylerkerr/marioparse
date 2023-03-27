@@ -75,7 +75,11 @@ window.addEventListener('DOMContentLoaded', function() {
                   let xhr = new XMLHttpRequest();
                   xhr.onreadystatechange = function() {
                       if (xhr.readyState == XMLHttpRequest.DONE) {
-                              xresp = xhr.responseText;
+                              if (xhr.status === 200) {
+                                xresp = xhr.responseText;
+                              } else {
+                                xresp = 'n/a'
+                              }
                               if (xresp != 'n/a') {
                                   xresp += '% snuggly';
                               }
