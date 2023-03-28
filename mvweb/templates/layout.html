@@ -25,6 +25,10 @@
             {% endif %}
             {% if request.args.get('region') %}in {{ request.args.get('region') }}
             {% endif %}
+            {% if request.args.get('date_start') %}starting on {{ request.args.get('date_start') }}
+            {% endif %}
+            {% if request.args.get('date_end') %}ending on {{ request.args.get('date_end') }}
+            {% endif %}
         {% endif -%}
         {%- if request.path == '/top/day' %}top kills of the day{% endif -%}
         {%- if request.path == '/top/week' %}top kills of the week{% endif -%}
