@@ -11,12 +11,12 @@
         <meta property="og:url" content="{{ request.url }}"/>
         <meta property="og:title" content="marioview: {{ title }}"/>
         <meta property="og:description" content="
-        {%- if request.path == '/search' %}{{ kms|length }} kills for {{ isk_total }} total isk
-            {% if request.args.get('killer_name') %}kills by {{ request.args.get('killer_name') }}{% endif %}
-            {% if request.args.get('killer_corp') %}kills by [{{ request.args.get('killer_corp') }}]{% endif %}
-            {% if request.args.get('victim_name') %}deaths by {{ request.args.get('victim_name') }}{% endif %}
-            {% if request.args.get('victim_corp') %}deaths by [{{ request.args.get('victim_corp') }}]{% endif %}
-            {% if request.args.get('system') %}occurring in {{ request.args.get('system') }}{% endif %}
+        {%- if request.path == '/search' %}{{ kms|length }} kills for {{ '{:,}'.format(isk_total) }} total isk
+            {% if request.args.get('killer_name') %}kills by {{ request.args.get('killer_name') }}<br />{% endif %}
+            {% if request.args.get('killer_corp') %}kills by [{{ request.args.get('killer_corp') }}]<br />{% endif %}
+            {% if request.args.get('victim_name') %}deaths by {{ request.args.get('victim_name') }}<br />{% endif %}
+            {% if request.args.get('victim_corp') %}deaths by [{{ request.args.get('victim_corp') }}]<br />{% endif %}
+            {% if request.args.get('system') %}occurring in {{ request.args.get('system') }}<br />{% endif %}
             {% if request.args.get('region') %}in {{ request.args.get('region') }}{% endif %}
         {% endif -%}
         {%- if request.path == '/top/day' %}top kills of the day{% endif -%}
