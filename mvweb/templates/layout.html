@@ -7,6 +7,13 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/static/img/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/static/img/favicon-16x16.png">
+    {%- if kms and kms|length > 0 %}
+        <meta property="og:url" content="{{ request.url }}"/>
+        <meta property="og:title" content="marioview: {{ title }}"/>
+        <meta property="og:description" content="{{ kms|length }} kills for {{ isk_total }} total isk"/>
+        <meta property="og:site_name" content="marioview"/>
+        <meta property="og:image" content="https://marioview.honk.click/static/img/apple-touch-icon.png"/>
+    {% endif -%}
 </head>
 <body>
     <nav>
