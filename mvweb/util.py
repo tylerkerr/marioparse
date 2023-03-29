@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from dateutil import parser
+from dateutil.relativedelta import relativedelta
 from csv import writer, reader
 from re import sub
 from math import copysign
@@ -7,6 +8,7 @@ from sqlalchemy.sql import bindparam, text
 from os import path
 from db import db
 import io
+import pandas
 
 basedir = path.abspath(path.dirname(__file__))
 
@@ -325,6 +327,29 @@ def get_db_age_oldest():
     oldest_hours_old = int(divmod(oldest_seconds_old, 3600)[0])
 
     return oldest_hours_old
+
+
+def get_today_iso():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+
+def get_all_months():
+    return pandas.date_range(parser.isoparse('2020-08-13').replace(day=1), get_today_iso(), freq='MS').strftime("%Y-%m").tolist()
+
+
+def get_month_start_stamp(month_string):
+    start_datetime = parser.isoparse(month_string).replace(day=1)
+    start_stamp = datetime.combine(
+            start_datetime, start_datetime.min.time(), tzinfo=timezone.utc).timestamp()
+    return start_stamp
+
+
+def get_month_end_stamp(month_string):
+    start_datetime = parser.isoparse(month_string).replace(day=1)
+    end_datetime = (start_datetime + relativedelta(months=1))
+    end_stamp = datetime.combine(
+            end_datetime, end_datetime.min.time(), tzinfo=timezone.utc).timestamp()
+    return end_stamp
 
 
 global truesec

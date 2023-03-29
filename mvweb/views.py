@@ -10,6 +10,7 @@ import io
 
 routes = Blueprint('views', __name__)
 
+
 @routes.route('/')
 def index():
     latest = db.session.execute(text('''
@@ -217,6 +218,28 @@ def alltime():
 @routes.route('/solo')
 def solo():
     return redirect("/leaderboard?total_participants=1", code=302)
+
+
+@routes.route('/destruction')
+def destruction():
+    months = util.get_all_months()
+    results = []
+    for month in months:
+        params = {
+            'month_start': util.get_month_start_stamp(month),
+            'month_end': util.get_month_end_stamp(month)
+        }
+        row = db.session.execute(text('''
+                                        SELECT count(report_id), sum(isk)
+                                        FROM Killmails
+                                        WHERE timestamp > :month_start AND timestamp < :month_end
+    '''), params=params).fetchone()
+        results.append((month,) + row._data)
+
+    return render_template('destruction.html', title="destruction", months=results)
+
+
+# api
 
 
 @routes.route('/api/snuggly/pilot/<pilot>')
