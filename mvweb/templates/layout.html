@@ -46,8 +46,8 @@
                 <div class="views">
                     <a href="{{ url_for('views.index') }}" class="{% if nav == 'index' %}active{% endif %} navlink"><span class="name">marioview</span></a>
                     <a href="{{ url_for('views.top_day') }}" class="{% if nav == 'top/day' %}active{% endif %} navlink"><span class="name">d</span></a>/<a href="{{ url_for('views.top_week') }}" class="{% if nav == 'top/week' %}active{% endif %} navlink"><span class="name">w</span></a>/<a href="{{ url_for('views.top_month') }}" class="{% if nav == 'top/month' %}active{% endif %} navlink"><span class="name">m</span></a>
-                    <a href="{{ url_for('positivity') }}" class="{% if nav == 'positivity' %}active{% endif %} navlink"><span class="name">positivity</span></a>
-                    <a href="{{ url_for('bullying') }}" class="{% if nav == 'bullying' %}active{% endif %} navlink"><span class="name">bullying</span></a>
+                    <a href="{{ url_for('views.positivity') }}" class="{% if nav == 'positivity' %}active{% endif %} navlink"><span class="name">positivity</span></a>
+                    <a href="{{ url_for('views.bullying') }}" class="{% if nav == 'bullying' %}active{% endif %} navlink"><span class="name">bullying</span></a>
                     <a href="https://honk.click/discord" class="navlink" target="_blank">discord</a>
                     <a href="https://echoes.mobi" class="navlink" target="_blank">echoes.mobi</a>
                 </div>
