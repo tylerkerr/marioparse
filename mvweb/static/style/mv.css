@@ -11,6 +11,10 @@ body {
     padding-top: 10px;
 }
 
+.hp-toggle.hidden {
+    display: none !important; 
+}
+
 .iconcolumn {
     width: 40px;
 }
@@ -22,6 +26,8 @@ body {
 .bigkill {
     text-shadow: 1px 1px 10px #fff;
 }
+
+
 
 .hisec .tablelink {
     color: #24e576;

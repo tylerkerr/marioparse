@@ -66,7 +66,7 @@
         {% endif -%}>{{ "{:,}".format(km['isk']) }}</td>
     <!-- <td>{{ km['victim_total_damage_received'] }}</td> -->
     <!-- <td>{{ km['total_participants'] }}</td> -->
-    <td>{{ km['date_killed'] }}</td>
+    <td ><span class="hp-toggle hidden moment" data-group="moments">{{ km['date_killed'] }}</span><span class="hp-toggle" data-group="moments">{{ km['date_killed'] }}</span></td>
     <td><a href="{{ km['image_url'] }}" target="_blank">
         {%- if kms|length < 100 %}
             <img src="{{ km['image_url'] }}" class="km_img_small">

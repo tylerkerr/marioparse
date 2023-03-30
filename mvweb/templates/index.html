@@ -1,23 +1,17 @@
 {% extends "layout.html" %}
 {% block content %}
-<script>
-    (() => {
-        document.addEventListener("DOMContentLoaded", () => {
-            new Tablesort(document.getElementById('resultstable'), { descending: true });
-        });
-    })();
-</script>
 {% include "searchform.html" %}
 <p class="mobilesizewarning">
     your device is small<br />
     turn it sideways..sorry<br />
 </p>
-<p>newest {{ kms|length }} killmails <span title="full refresh {{ oldest_hours }}h ago">(last database update {{ update_age_minutes }} minutes ago)</span></p>
+<p>newest {{ kms|length }} killmails <span title="full refresh {{ oldest_hours }}h ago">(last update {{
+        update_age_minutes }} minutes ago)</span></p>
 <table class="sortable" id="resultstable">
-{% include "tablehead.html" %}
+    {% include "tablehead.html" %}
 
-{% for km in kms %}
+    {% for km in kms %}
     {% include "tablerow.html" %}
-{% endfor %}
+    {% endfor %}
 </table>
 {% endblock %}
