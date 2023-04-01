@@ -57,7 +57,7 @@
     <div class="filterrow">
         <div class="filter">
             <label class="datelabel">from</label>
-            <input class="dateinput" type="date" id="start" name="date_start" placeholder="Start date" min="2020-08-12"
+            <input class="dateinput" id="startDate" type="date" id="start" name="date_start" placeholder="Start date" min="2020-08-12"
                 value="{{ request.args.get('date_start') or '' }}" />
         </div>
         <div class="filter">
@@ -78,6 +78,9 @@
         <div class="filter">
             <label class="sololabel">solo only</label>
             <input type="checkbox" name="total_participants" value="1" {% if request.args.get('total_participants') == '1' %}checked{% endif %}/>
+        </div>
+        <div class="filter">
+            <span class="datebuttons"><a href='#' onclick="return false;" id="dayButton" class="tablelink">day</a> / <a href='#' onclick="return false;" id="weekButton" class="tablelink">week</a> / <a href='#' onclick="return false;" id="monthButton" class="tablelink">month</a></span>
         </div>
     </div>
 </form>

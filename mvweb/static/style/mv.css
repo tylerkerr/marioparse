@@ -237,11 +237,7 @@ form.filters {
 
 .filter {
     align-items: center;
-    flex-direction: row;
-    display: flex;
-    flex: 1;
     padding: 2px;
-    text-align: center;
     font-size: 10px;
     color: gray;
 }
@@ -255,6 +251,11 @@ form.filters {
 
 .sololabel {
     margin-left: -32px;
+}
+
+.datebuttons {
+    margin-left: -32px;
+    margin-top: 5px;
 }
 
 .dateinput {

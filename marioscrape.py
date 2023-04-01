@@ -132,6 +132,11 @@ def create_tables(db_name):
 
 # date stuff
 
+
+def nowstamp():
+    return int(datetime.now().timestamp())
+
+
 def is_this_month(month_iso):
     if month_iso == get_this_month():
         return True
@@ -269,6 +274,8 @@ def download_kills(start_date, end_date):
             km['victim_corp'] = fixed
 
         timestamp = int(parser.isoparse(km['date_killed']).timestamp())
+        if timestamp > (nowstamp() + (86400 * 2)):
+            continue
         km['timestamp'] = timestamp
         stamped_kms.append(km)
     return stamped_kms

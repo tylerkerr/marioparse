@@ -150,3 +150,27 @@ window.addEventListener('DOMContentLoaded', function () {
     })
   });
 })();
+
+window.addEventListener('DOMContentLoaded', function () {
+  let dayButton = document.getElementById('dayButton');
+  let startDate = document.getElementById('startDate');
+  dayButton.addEventListener('click', () => {
+    startDate.value = moment().subtract(1, 'days').format("YYYY-MM-DD");
+  });
+});
+
+window.addEventListener('DOMContentLoaded', function () {
+  let dayButton = document.getElementById('weekButton');
+  let startDate = document.getElementById('startDate');
+  dayButton.addEventListener('click', () => {
+    startDate.value = moment().subtract(7, 'days').format("YYYY-MM-DD");
+  });
+});
+
+window.addEventListener('DOMContentLoaded', function () {
+  let dayButton = document.getElementById('monthButton');
+  let startDate = document.getElementById('startDate');
+  dayButton.addEventListener('click', () => {
+    startDate.value = moment().subtract(1, 'months').format("YYYY-MM-DD");
+  });
+});
