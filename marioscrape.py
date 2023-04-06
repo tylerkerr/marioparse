@@ -274,7 +274,7 @@ def download_kills(start_date, end_date):
             km['victim_corp'] = fixed
 
         timestamp = int(parser.isoparse(km['date_killed']).timestamp())
-        if timestamp > (nowstamp() + (86400 * 2)):
+        if timestamp > (nowstamp() + (60 * 60)):    # discard killmails that occur over an hour in the future
             continue
         km['timestamp'] = timestamp
         stamped_kms.append(km)
