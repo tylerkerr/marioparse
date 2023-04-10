@@ -12,7 +12,7 @@ def get_valid_columns():
 
 class Killmails(db.Model):
     id = db.Column(db.String, primary_key=True, nullable=False, unique=True)
-    report_id = db.Column(db.String, nullable=False)
+    report_id = db.Column(db.Integer, nullable=False)
     killer_corp = db.Column(db.String)
     killer_name = db.Column(db.String, nullable=False)
     isk = db.Column(db.Integer, nullable=False)

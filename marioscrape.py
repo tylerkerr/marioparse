@@ -77,7 +77,7 @@ def create_tables(db_name):
     c.executescript('''
     CREATE TABLE "Killmails" (
 	"id"	                        TEXT NOT NULL PRIMARY KEY UNIQUE,
-	"report_id"	                    TEXT NOT NULL,
+	"report_id"	                    INTEGER NOT NULL,
     "killer_corp"	                TEXT,
     "killer_name"                   TEXT NOT NULL,
     "isk"                           INTEGER NOT NULL,
@@ -275,6 +275,8 @@ def download_kills(start_date, end_date):
 
         timestamp = int(parser.isoparse(km['date_killed']).timestamp())
         if timestamp > (nowstamp() + (60 * 60)):    # discard killmails that occur over an hour in the future
+            continue
+        if km['report_id'] == None or km['report_id'] < 10000 and timestamp > 1640995200:   # test server killmails: id < 10k and timestamp after jan 1 2022
             continue
         km['timestamp'] = timestamp
         stamped_kms.append(km)
