@@ -352,6 +352,17 @@ def get_month_end_stamp(month_string):
     return end_stamp
 
 
+def get_mode_columns(mode):
+    if mode.lower() == 'corp':
+        return 'killer_corp', 'victim_corp'
+    elif mode.lower() == 'pilot':
+        return 'killer_name', 'victim_name'
+    elif mode.lower() == 'ship':
+        return 'killer_ship_type', 'victim_ship_type'
+    else:
+        return False, False
+
+
 global truesec
 truesec = parse_truesec_csv()
 global sec_lookup

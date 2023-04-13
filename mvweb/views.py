@@ -151,43 +151,59 @@ def loserboard():
 
 
 @routes.route('/positivity')
-def positivity():
-    corps_poz = db.session.execute(text('''
-                                        SELECT killer_corp, sum(isk)
+def positivity_redirect():
+    return redirect("/positivity/corp", code=302)
+
+@routes.route('/positivity/<mode>')
+def positivity(mode):
+    poz_col, neg_col = util.get_mode_columns(mode)
+    if not poz_col:
+        return "Very bad request", 400
+    poz = db.session.execute(text(f'''
+                                        SELECT {poz_col}, sum(isk)
                                         FROM Killmails
-                                        GROUP BY killer_corp
+                                        WHERE {poz_col} NOT NULL AND {poz_col} != '' AND {poz_col} != '[2' AND {poz_col} != '[7'
+                                        GROUP BY {poz_col}
                                         ORDER BY sum(isk)
     '''))
-    corps_neg = db.session.execute(text('''
-                                        SELECT victim_corp, sum(isk)
+    neg = db.session.execute(text(f'''
+                                        SELECT {neg_col}, sum(isk)
                                         FROM Killmails
-                                        GROUP BY victim_corp
+                                        WHERE {neg_col} NOT NULL AND {neg_col} != '' AND {neg_col} != '[2' AND {neg_col} != '[7'
+                                        GROUP BY {neg_col}
                                         ORDER BY sum(isk)
     '''))
     score = {}
-    for corp in corps_poz:
-        score[corp[0]] = corp[1]
-    for corp in corps_neg:
-        if not corp[0] in score:
-            score[corp[0]] = corp[1] * -1
+    for entity in poz:
+        score[entity[0]] = entity[1]
+    for entity in neg:
+        if not entity[0] in score:
+            score[entity[0]] = entity[1] * -1
         else:
-            score[corp[0]] = score[corp[0]] - corp[1]
+            score[entity[0]] = score[entity[0]] - entity[1]
     sorted_score = dict(
         sorted(score.items(), key=lambda item: item[1], reverse=True))
-    return render_template('positivity.html', title="positivity", score=sorted_score)
+    return render_template('positivity.html', title="positivity", score=sorted_score, mode=mode)
 
 
 @routes.route('/bullying')
-def bullying():
-    bullies = db.session.execute(text('''
-                                        SELECT killer_corp, victim_corp, sum(isk)
+def bullying_redirect():
+    return redirect("/bullying/corp", code=302)
+
+@routes.route('/bullying/<mode>')
+def bullying(mode):
+    poz_col, neg_col = util.get_mode_columns(mode)
+    if not poz_col:
+        return "Very bad request", 400
+    bullies = db.session.execute(text(f'''
+                                        SELECT {poz_col}, {neg_col}, sum(isk)
                                         FROM Killmails
-                                        WHERE killer_corp not null AND victim_corp not null
-                                        GROUP BY killer_corp, victim_corp
+                                        WHERE {poz_col} not null AND {neg_col} not null AND {poz_col} != '' AND {poz_col} != '[2' AND {poz_col} != '[7' AND {neg_col} != '' AND {neg_col} != '[2' AND {neg_col} != '[7'
+                                        GROUP BY {poz_col}, {neg_col}
                                         ORDER BY sum(isk) desc
                                         LIMIT 500
     '''))
-    return render_template('bullying.html', title="bullying olympics", bullies=bullies)
+    return render_template('bullying.html', title="bullying olympics", bullies=bullies, mode=mode)
 
 
 @routes.route('/timeline/pilot/<pilot>')

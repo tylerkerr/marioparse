@@ -2,6 +2,7 @@ body {
     font-family: Helvetica, Arial, sans-serif;
     color: #dddddd;
     background-color: #222222;
+    margin-top: 0px;
 }
 
 .footer {
@@ -26,8 +27,6 @@ body {
 .bigkill {
     text-shadow: 1px 1px 10px #fff;
 }
-
-
 
 .hisec .tablelink {
     color: #24e576;
@@ -70,6 +69,12 @@ body {
     color: inherit;
     font-size: 12px;
 }
+
+.subnavlink {
+    color: inherit;
+    font-size: 16px;
+}
+
 
 .yaxistext {
     font-size: 0.8em;
@@ -155,8 +160,14 @@ table {
     table-layout: fixed;
 }
 
+.paddingtable {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+}
+
 .paddingtable td {
-    padding: 8px;
+    padding: 8px 16px 8px 16px;
 }
 
 th {

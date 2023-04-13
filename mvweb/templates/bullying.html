@@ -1,11 +1,12 @@
 {% extends "layout.html" %}
 {% block content %}
 {% set count = namespace(value=1) %}
+{% include 'bullyingnav.html' %}
 <table class="paddingtable">
     <tr>
         <th>place</th>
-        <th>bullying corp</th>
-        <th>owned corp</th>
+        <th>bullying {{ mode }}</th>
+        <th>owned {{ mode }}</th>
         <th>isk total</th>
     </tr>
 {% for pair in bullies %}

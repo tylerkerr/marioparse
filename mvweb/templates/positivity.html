@@ -1,10 +1,11 @@
 {% extends "layout.html" %}
 {% block content %}
 {% set count = namespace(value=1) %}
+{% include 'positivitynav.html' %}
 <table class="paddingtable">
     <tr>
         <th>place</th>
-        <th>corp</th>
+        <th>{{ mode }}</th>
         <th>isk total</th>
     </tr>
 {% for corp in score %}
