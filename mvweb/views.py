@@ -183,7 +183,7 @@ def positivity(mode):
             score[entity[0]] = score[entity[0]] - entity[1]
     sorted_score = dict(
         sorted(score.items(), key=lambda item: item[1], reverse=True))
-    return render_template('positivity.html', title="positivity", score=sorted_score, mode=mode)
+    return render_template('positivity.html', title="positivity", score=sorted_score, mode=mode, poz=poz_col, neg=neg_col)
 
 
 @routes.route('/bullying')
@@ -203,7 +203,7 @@ def bullying(mode):
                                         ORDER BY sum(isk) desc
                                         LIMIT 500
     '''))
-    return render_template('bullying.html', title="bullying olympics", bullies=bullies, mode=mode)
+    return render_template('bullying.html', title="bullying olympics", bullies=bullies, mode=mode, poz=poz_col, neg=neg_col)
 
 
 @routes.route('/timeline/pilot/<pilot>')

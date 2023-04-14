@@ -11,7 +11,7 @@
 {% for corp in score %}
     <tr>
         <td>{{ count.value }}</td>
-        <td><a href="/search?killer_corp={{ corp }}" class="tablelink">{{ corp }}</a></td>
+        <td><a href="/search?{{ poz }}={{ corp }}" class="tablelink">{{ corp }}</a></td>
         <td>{{ "{:,}".format(score[corp]) }}</td>
     </tr>
     {% set count.value = count.value + 1 %}
