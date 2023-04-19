@@ -1,4 +1,5 @@
 import util
+from re import sub
 
 
 def register(jinja_env):
@@ -7,6 +8,7 @@ def register(jinja_env):
     jinja_env.filters['get_system_sec'] = get_system_sec
     jinja_env.filters['is_faction'] = is_faction
     jinja_env.filters['is_faction_possible'] = is_faction_possible
+    jinja_env.filters['rewrite_limit'] = rewrite_limit
 
 
 def urlify(text):
@@ -46,3 +48,7 @@ def is_faction_possible(shipclass):
     if shipclass.lower() in ['frigate', 'cruiser', 'battleship']:
         return True
     return False
+
+
+def rewrite_limit(url, new_limit):
+    return sub(r'&?limit=\d+', '', url) + '&limit=' + str(new_limit)

@@ -8,11 +8,11 @@
         <th>{{ mode }}</th>
         <th>isk total</th>
     </tr>
-{% for corp in score %}
+{% for row in score %}
     <tr>
         <td>{{ count.value }}</td>
-        <td><a href="/search?{{ poz }}={{ corp }}" class="tablelink">{{ corp }}</a></td>
-        <td>{{ "{:,}".format(score[corp]) }}</td>
+        <td><a href="/search?{{ poz }}={{ corp }}" class="tablelink">{{ row }}</a></td>
+        <td>{{ "{:,}".format(score[row]) }}</td>
     </tr>
     {% set count.value = count.value + 1 %}
 {% endfor %}

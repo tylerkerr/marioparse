@@ -12,7 +12,14 @@
     your device is small<br />
     turn it sideways..sorry<br />
 </p>
-<p>{{ kms|length }} killmails for {{ "{:,}".format(isk_total) }} total isk {% if kms|length > 0 %}{% include "csvlink.html" %}{% endif %}<!-- from {{ timestamp_start }} to {{ timestamp_end }}--></p>
+<p>{%- if kms|length == limit %}top {% endif -%}{{ kms|length }} killmails for {{ "{:,}".format(isk_total) }} total isk 
+    {%- if kms|length > 0 %}
+        {% include "csvlink.html" %}
+    {% endif -%}
+    {%- if kms|length == limit %}
+        <a href="{{ request.full_path|rewrite_limit(50000) }}" class="csvlink">(load all killmails)</a>
+    {% endif -%}
+</p>
 <table class="sortable" id="resultstable">
     {% include "tablehead.html" %}
 

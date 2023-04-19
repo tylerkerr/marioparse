@@ -94,9 +94,16 @@ def search():
         if arg not in get_valid_columns():
             return "Very bad request", 400
 
+    limit_arg = request.args.get('limit')
+    if limit_arg and limit_arg.isdigit():
+        limit = limit_arg
+    else:
+        limit = 1000
+    new_limit = 50000
+
     params = util.gen_params(request.args)
     start = "SELECT * FROM Killmails WHERE"
-    end = "ORDER BY isk DESC LIMIT 10000"
+    end = f"ORDER BY isk DESC LIMIT {limit}"
     query = util.gen_select(start, end, params)
 
     kms = db.session.execute(query, params=params)
@@ -111,7 +118,7 @@ def search():
 
     isk_total = sum(km._mapping['isk'] for km in killmails)
 
-    return render_template('search.html', title="killmail search", kms=killmails, isk_total=isk_total, timestamp_start=params['timestamp_start'], timestamp_end=params['timestamp_end'])
+    return render_template('search.html', title="killmail search", kms=killmails, isk_total=isk_total, timestamp_start=params['timestamp_start'], timestamp_end=params['timestamp_end'], limit=limit, new_limit=new_limit)
 
 
 @routes.route('/leaderboard', methods=['GET'])

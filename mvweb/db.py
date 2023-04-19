@@ -8,6 +8,7 @@ def get_valid_columns():
     valid_columns.append('date_start')
     valid_columns.append('date_end')
     valid_columns.append('csv')
+    valid_columns.append('limit')
     return valid_columns
 
 class Killmails(db.Model):
