@@ -25,7 +25,7 @@
             {% if request.args.get('victim_name') %}<th role="columnheader">Victim</th>{% endif %}
             {% if request.args.get('victim_ship_type') %}<th role="columnheader">V. ship</th>{% endif %}
             {% if request.args.get('victim_ship_category') %}<th class="hideonmobile" role="columnheader">V. class</th>{% endif %}
-            <th class="hideonmobile" role="columnheader">System</th>
+            <th role="columnheader">System</th>
             <!-- <th role="columnheader">Constellation</th> -->
             {% if request.args.get('region') %}<th role="columnheader">Region</th>{% endif %}
             <th data-sort-default role="columnheader">Total Isk</th>
@@ -90,7 +90,7 @@
         {% endif -%}
         {% if request.args.get('victim_ship_type') %}<td><a href="/search?victim_ship_type={{ km['victim_ship_type'] }}" class="tablelink">{{ '' if not km['victim_ship_type'] else  km['victim_ship_type'] }}</a></td>{% endif %}
         {% if request.args.get('victim_ship_category') %}<td class="hideonmobile" ><a href="/search?victim_ship_category={{ km['victim_ship_category'] }}" class="tablelink"><img src="/static/img/shipclass/{{ km['victim_ship_category']|lower }}.png"></a></td>{% endif %}
-        <td class="hideonmobile" ><a href="/search?system={{ km['system'] }}" class="tablelink">{{ '' if not km['system'] else km['system']}}</a></td>
+        <td><a href="/search?system={{ km['system'] }}" class="tablelink">{{ '' if not km['system'] else km['system']}}</a></td>
         <!-- <td>{{ km['constellation'] }}</td> -->
         {% if request.args.get('region') %}<td><a href="/search?region={{ km['region'] }}" class="tablelink">{{ '' if not km['region'] else km['region']}}</a></td>{% endif %}
         <td>{{ "{:,}".format(km['SUM(ISK)']) }}</td>
