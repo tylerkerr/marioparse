@@ -256,16 +256,12 @@ form.filters {
 .datelabel {
     display: inline-block;
     clear: left;
-    width: 12%;
+    width: 15%;
     text-align: right;
-}
-
-.sololabel {
-    margin-left: -32px;
+    padding-right: 2px;
 }
 
 .datebuttons {
-    margin-left: -32px;
     margin-top: 5px;
 }
 
@@ -290,6 +286,9 @@ form.filters {
     padding: 2px;
 }
 
+.extrabuttons {
+    position: absolute;
+}
 
 .tablelink {
     text-decoration: none;

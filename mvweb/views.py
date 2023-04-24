@@ -157,6 +157,24 @@ def loserboard():
     return render_template('loserboard.html', title="killmail search", kms=killmails, url_params=url_params)
 
 
+@routes.route('/systemboard', methods=['GET'])
+def systemboard():
+    for arg in request.args:
+        if arg not in get_valid_columns():
+            return "Very bad request", 400
+
+    params = util.gen_params(request.args)
+    start = "SELECT *, COUNT(report_id), SUM(ISK) FROM Killmails WHERE system NOT NULL AND"
+    end = "AND isk > 0 GROUP BY system ORDER BY SUM(isk) DESC LIMIT 1000"
+    query = util.gen_select(start, end, params)
+
+    kms = db.session.execute(query, params=params)
+
+    killmails = kms.all()
+    url_params = request.full_path.replace('/systemboard?', '')
+    return render_template('systemboard.html', title="killmail search", kms=killmails, url_params=url_params)
+
+
 @routes.route('/positivity')
 def positivity_redirect():
     return redirect("/positivity/corp", code=302)
