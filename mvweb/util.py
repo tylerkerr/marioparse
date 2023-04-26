@@ -181,6 +181,8 @@ def gen_select(start, end, params):
                 select.append('timestamp >= :timestamp_start')
             elif param == 'timestamp_end':
                 select.append('timestamp <= :timestamp_end')
+            elif param == 'limit':
+                continue
             else:
                 if type(params[param]) is tuple:
                     expand_params.append(param)
