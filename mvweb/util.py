@@ -1,12 +1,14 @@
 from datetime import datetime, timezone
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
-from csv import writer, reader
+from csv import writer, reader, DictReader
 from re import sub
 from math import copysign
 from sqlalchemy.sql import bindparam, text
 from os import path
 from db import db
+from requests import get
+from collections import defaultdict
 import io
 import pandas
 
@@ -342,7 +344,7 @@ def get_all_months():
 def get_month_start_stamp(month_string):
     start_datetime = parser.isoparse(month_string).replace(day=1)
     start_stamp = datetime.combine(
-            start_datetime, start_datetime.min.time(), tzinfo=timezone.utc).timestamp()
+        start_datetime, start_datetime.min.time(), tzinfo=timezone.utc).timestamp()
     return start_stamp
 
 
@@ -350,7 +352,7 @@ def get_month_end_stamp(month_string):
     start_datetime = parser.isoparse(month_string).replace(day=1)
     end_datetime = (start_datetime + relativedelta(months=1))
     end_stamp = datetime.combine(
-            end_datetime, end_datetime.min.time(), tzinfo=timezone.utc).timestamp()
+        end_datetime, end_datetime.min.time(), tzinfo=timezone.utc).timestamp()
     return end_stamp
 
 
@@ -364,6 +366,270 @@ def get_mode_columns(mode):
     else:
         return False, False
 
+
+def get_now_stamp():
+    return int(datetime.now(timezone.utc).timestamp())
+
+
+def spaceteam_make_base_url(sheet_id):
+    return 'https://docs.google.com/spreadsheets/d/e/' + sheet_id + '/pub?output=csv'
+
+
+spaceteam_metadata_cache = defaultdict(dict)
+
+
+def spaceteam_get_metadata(sheet_id):
+    if sheet_id in spaceteam_metadata_cache:
+        # 10 minute cache time
+        if get_now_stamp() - spaceteam_metadata_cache[sheet_id]['timestamp'] < 60 * 10:
+            print(
+                f"metadata cache hit {sheet_id} {get_now_stamp() - spaceteam_metadata_cache[sheet_id]['timestamp']}s old")
+            return spaceteam_metadata_cache[sheet_id]['metadata']
+        else:
+            print(
+                f"metadata cache miss {sheet_id} {get_now_stamp() - spaceteam_metadata_cache[sheet_id]['timestamp']}s old")
+    else:
+        print(f"metadata cache miss {sheet_id} is new to us")
+    base_url = spaceteam_make_base_url(sheet_id)
+    metadata_url = base_url + '&gid=0'
+    metadata_in = get(metadata_url).text.splitlines()[1:]
+    metadata = {}
+    metadata['conflict'] = None
+    metadata['start_date'] = None
+    metadata['end_date'] = None
+    metadata['moderator'] = None
+    metadata['teams'] = []
+    for row in metadata_in:
+        k, v = row.split(',')
+        if k.lower() == 'conflict':
+            metadata['conflict'] = v
+        elif k.lower() == 'conflict_start':
+            metadata['start_date'] = v
+        elif k.lower() == 'conflict_end':
+            metadata['end_date'] = v
+        elif k.lower() == 'moderator':
+            metadata['moderator'] = v
+        elif k.lower() == 'team':
+            metadata['teams'].append(v)
+
+    spaceteam_metadata_cache[sheet_id] = {
+        'timestamp': get_now_stamp(), 'metadata': metadata}
+    return metadata
+
+
+def spaceteam_validate_metadata(metadata):
+    try:
+        assert metadata['conflict'] != None
+        assert metadata['start_date'] != None
+        assert metadata['moderator'] != None
+        assert len(metadata['teams']) > 0
+        assert type(date_to_timestamp(metadata['start_date'])) == int
+        if metadata['end_date']:
+            assert type(date_to_timestamp(metadata['end_date'])) == int
+            assert date_to_timestamp(metadata['end_date'], end=True) > date_to_timestamp(
+                metadata['start_date'])
+    except AssertionError:
+        return False
+    return True
+
+
+def spaceteam_validate_events(events):
+    for event in events:
+        try:
+            assert type(date_to_timestamp(event['date'])) == int
+            assert len(event['corp']) > 0 and len(event['corp']) < 5
+            assert len(event['team']) > 0
+            assert event['event'].lower(
+            ) == 'join' or event['event'].lower() == 'leave'
+        except AssertionError:
+            return False
+    return True
+
+
+def spaceteam_make_event_url(base_url):
+    events_gid = '1577917373'
+    return base_url + '&gid=' + events_gid
+
+
+spaceteam_event_cache = defaultdict(dict)
+
+
+def spaceteam_get_events(sheet_id):
+    if sheet_id in spaceteam_event_cache:
+        # 10 minute cache time
+        if get_now_stamp() - spaceteam_event_cache[sheet_id]['timestamp'] < 60 * 10:
+            print(
+                f"event cache hit {sheet_id} {get_now_stamp() - spaceteam_event_cache[sheet_id]['timestamp']}s old")
+            return spaceteam_event_cache[sheet_id]['events']
+        else:
+            print(
+                f"event cache miss {sheet_id} {get_now_stamp() - spaceteam_event_cache[sheet_id]['timestamp']}s old")
+    else:
+        print(f"event cache miss {sheet_id} is new to us")
+    base_url = spaceteam_make_base_url(sheet_id)
+    events = list(DictReader(io.StringIO(
+        get(spaceteam_make_event_url(base_url)).text)))
+    processed = []
+    for e in events:
+        end = True if e['event'].lower() == 'join' else False
+        e['timestamp'] = date_to_timestamp(e['date'], end=end)
+        processed.append(e)
+    sort = sorted(processed, key=lambda d: d['timestamp'])
+    spaceteam_event_cache[sheet_id] = {
+        'timestamp': get_now_stamp(), 'events': sort}
+    return sort
+
+
+def spaceteam_get_corps(sheet_id):
+    corps = {}
+    base_url = spaceteam_make_base_url(sheet_id)
+    events = spaceteam_get_events(sheet_id)
+
+    for e in events:
+        if e['event'].lower() == 'join':
+            if e['corp'] not in corps:
+                corps[e['corp'].upper()] = {'current_team': e['team'], 'current_alliance': e['alliance'], 'history': [
+                    {'event': 'join', 'date': e['date'], 'team': e['team']}]}
+            else:
+                corps[e['corp']]['current_team'] = e['team']
+                corps[e['corp']]['current_alliance'] = e['alliance']
+                corps[e['corp']]['history'].append(
+                    {'event': 'join', 'date': e['date'], 'team': e['team']})
+        if e['event'].lower() == 'leave':
+            if e['corp'] not in corps:
+                continue
+            else:
+                corps[e['corp']]['current_team'] = None
+                corps[e['corp']]['current_alliance'] = e['alliance']
+                corps[e['corp']]['history'].append(
+                    {'event': 'leave', 'date': e['date']})
+
+    return corps
+
+
+def spaceteam_get_teams(corps):
+    teams = {}
+    for corp in corps:
+        team = corps[corp]['current_team']
+        if corps[corp]['current_alliance'] == '':
+            alliance = 'Naked'
+        else:
+            alliance = corps[corp]['current_alliance']
+        if team not in teams:
+            teams[team] = {'alliances': {alliance: [corp]}}
+        else:
+            if alliance not in teams[team]['alliances']:
+                teams[team]['alliances'][alliance] = [corp]
+            else:
+                teams[team]['alliances'][alliance].append(corp)
+    return teams
+
+
+def spaceteam_get_alliances(corps):
+    alliances = {}
+    for corp in corps:
+        if corps[corp]['current_alliance'] not in alliances:
+            alliances[corps[corp]['current_alliance']] = [corp]
+        else:
+            alliances[corps[corp]['current_alliance']].append(corp)
+    return alliances
+
+
+def spaceteam_get_corp_range(hist):
+    ranges = []
+    last_join_time = None
+    last_join_team = None
+    for i, event in enumerate(hist):
+        end = True if event['event'].lower() == 'leave' else False
+        event_stamp = date_to_timestamp(event['date'], end=end)
+        if event['event'].lower() == 'join':
+            if i == len(hist) - 1:
+                range = {'join': event_stamp,
+                         'leave': None, 'team': event['team']}
+                ranges.append(range)
+            else:
+                last_join_time = event_stamp
+                last_join_team = event['team']
+        if event['event'].lower() == 'leave':
+            range = {'join': last_join_time,
+                     'leave': event_stamp, 'team': last_join_team}
+            ranges.append(range)
+            last_join_time = None
+            last_join_team = None
+
+    return ranges
+
+
+def spaceteam_get_all_corp_ranges(corps):
+    all_ranges = {}
+    for corp in corps:
+        hist = corps[corp]['history']
+        ranges = spaceteam_get_corp_range(hist)
+        all_ranges[corp] = ranges
+    return all_ranges
+
+
+def spaceteam_get_team_membership(corp, timestamp, ranges):
+    for range in ranges[corp]:
+        if range['leave'] == None:
+            leave = date_to_timestamp('2200-12-31', end=True)
+        else:
+            leave = range['leave']
+        if timestamp > range['join'] and timestamp < leave:
+            return range['team']
+    return None
+
+
+def spaceteam_kms_to_teams(kms, corps, teams):
+    team_kms = {}
+    for team in teams:
+        if team:
+            team_kms[team] = []
+
+    corp_ranges = spaceteam_get_all_corp_ranges(corps)
+
+    for km in kms:
+        killer_corp = km._mapping['killer_corp']
+        victim_corp = km._mapping['victim_corp']
+        if killer_corp and victim_corp:
+            if killer_corp in corps and victim_corp in corps:
+                killer_team = spaceteam_get_team_membership(
+                    killer_corp, km._mapping['timestamp'], corp_ranges)
+                victim_team = spaceteam_get_team_membership(
+                    victim_corp, km._mapping['timestamp'], corp_ranges)
+                if killer_team and victim_team and killer_team != victim_team:
+                    team_kms[killer_team].append(km)
+
+    return team_kms
+
+
+def spaceteam_team_stats(kms):
+    stats = defaultdict(int)
+    stats['isk'] = 0
+    for km in kms:
+        stats[km._mapping['victim_ship_category']
+              ] += 1 if km._mapping['victim_ship_category'] else 0
+        stats['isk'] += km._mapping['isk']
+    return stats
+
+
+def spaceteam_all_team_stats(team_kms):
+    team_stats = {}
+    for team in team_kms:
+        if team:
+            team_stats[team] = spaceteam_team_stats(team_kms[team])
+    return team_stats
+
+
+structure_classes = ['Capsuleer Outpost', 'Corporation Outpost I',
+                     'Corporation Outpost II', 'Ansiblex Stargate', 'Analytical Computer',
+                     'Anomaly Observation Array', 'Base Detection Array', 'Bounty Management Center',
+                     'Cynosural Beacon Tower', 'Cynosural Jammer Tower', 'Insurance Office', 'Pirate Detection Array',
+                     'Space Lab', 'Tax Center']
+# structure_classes = ['Citadel']
+subcap_classes = ['Capsule', 'Shuttle', 'Frigate', 'Destroyer', 'Cruiser', 'Battlecruiser', 'Battleship', 'Industrial Ship']
+capital_classes = ['Carrier', 'Dreadnought',  'Force Auxiliary', 'Freighter',
+                   'Jump Freighter', 'Capital Industrial Ship', 'Versatile Assault Ship']
 
 global truesec
 truesec = parse_truesec_csv()

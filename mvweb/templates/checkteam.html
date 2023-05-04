@@ -1,0 +1,121 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<table class="paddingtable">
+    <thead>
+        <tr>
+            <th>k</th>
+            <th>v</th>
+        </tr>
+    </thead>
+    <tr>
+        <td>Metadata sheet URL</td>
+        <td>{{ base_url }}</td>
+    </tr>
+    <tr>
+        <td>Events sheet URL</td>
+        <td>{{ events_url }}</td>
+    </tr>
+    <tr>
+        <td>Metadata is valid</td>
+        <td>{{ meta_validation }}</td>
+    </tr>
+    <tr>
+        <td>Event data is valid</td>
+        <td>{{ event_validation }}</td>
+    </tr>
+    <tr>
+        <td>Conflict Name</td>
+        <td>{{ metadata['conflict'] }}</td>
+    </tr>
+    <tr>
+        <td>Moderator</td>
+        <td>{{ metadata['moderator'] }}</td>
+    </tr>
+    <tr>
+        <td>Conflict start date</td>
+        <td>{{ metadata['start_date'] }}</td>
+    </tr>
+    <tr>
+        <td>Conflict end date</td>
+        <td>{{ metadata['end_date'] if metadata['end_date'] else 'Ongoing' }}</td>
+    </tr>
+    <tr>
+        <td>Teams</td>
+        <td>{{ metadata['teams']|length }}</td>
+    </tr>
+    <tr>
+        <td>Events</td>
+        <td>{{ events|length }}</td>
+    </tr>
+    {% for team in metadata['teams'] %}
+    <tr>
+        <td>Team</td>
+        <td>{{ team }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+<table class="sortable" id="resultstable">
+    <thead>
+        <tr>
+            <th>corp</th>
+            <th>alliance</th>
+            <th>team</th>
+        </tr>
+    </thead>
+    {% for corp in corps %}
+    <tr>
+        <td>{{ corp }}</td>
+        <td>{{ corps[corp]['current_alliance'] }}</td>
+        <td>{{ corps[corp]['current_team'] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br />
+<br />
+
+<table class="sortable" id="resultstable">
+    <thead>
+        <tr>
+            <th>corp</th>
+            <th>ranges</th>
+        </tr>
+    </thead>
+    {% for corp in ranges %}
+    <tr>
+        <td>{{ corp }}</td>
+        <td>{{ ranges[corp] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+<table class="paddingtable">
+    <thead>
+        <tr>
+            <th>date</th>
+            <th>timestamp</th>
+            <th>corp</th>
+            <th>alliance</th>
+            <th>team</th>
+            <th>event</th>
+            <th>valid</th>
+        </tr>
+    </thead>
+    {% for event in events %}
+    <tr>
+        <td>{{ event['date'] }}</td>
+        <td>{{ event['timestamp'] }}</td>
+        <td>{{ event['corp'] }}</td>
+        <td>{{ event['alliance'] }}</td>
+        <td>{{ event['team'] }}</td>
+        <td>{{ event['event'] }}</td>
+        <td>{{ event|validate_event }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

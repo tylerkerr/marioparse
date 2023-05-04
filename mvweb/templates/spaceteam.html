@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="spaceteam">
+    <section class="cards">
+        {% for team in team_kms %}
+        <article class="card">
+            <div class="teamname">Spaceteam: <b>{{ team }}</b></div>
+            <div class="teamstats">
+                <div class="statsection">
+                    <span class="total">Total kills: <b>{{ team_kms[team]|length }}</b></span>
+                    <span class="total">Total isk: <b>{{ "{:,}".format(team_stats[team]['isk']) }}</b></span>
+                </div>
+                <div class="statsection">
+                    <span class="statheader">Subcapital ships</span>
+                    {% for stat in subcaps %}
+                        <span class="stat">{{ stat }} : {{ team_stats[team][stat] }}</span>
+                    {% endfor %}
+                </div>
+                <div class="statsection">
+                    <span class="statheader">Capital ships</span>
+                    {% for stat in caps %}
+                        <span class="stat">{{ stat }} : {{ team_stats[team][stat] }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </section>
+</div>
+
+
+
+{% endblock %}

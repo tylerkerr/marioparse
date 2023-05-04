@@ -9,6 +9,8 @@ def register(jinja_env):
     jinja_env.filters['is_faction'] = is_faction
     jinja_env.filters['is_faction_possible'] = is_faction_possible
     jinja_env.filters['rewrite_limit'] = rewrite_limit
+    jinja_env.filters['validate_event'] = validate_event
+    jinja_env.filters['is_category_capital'] = is_category_capital
 
 
 def urlify(text):
@@ -52,3 +54,21 @@ def is_faction_possible(shipclass):
 
 def rewrite_limit(url, new_limit):
     return sub(r'&?limit=\d+', '', url) + '&limit=' + str(new_limit)
+
+
+def validate_event(event):
+    try:
+        assert type(util.date_to_timestamp(event['date'])) == int
+        assert len(event['corp']) > 0 and len(event['corp']) < 5
+        assert len(event['team']) > 0
+        assert event['event'].lower() == 'join' or event['event'].lower() == 'leave'
+    except AssertionError:
+        return False
+    return True
+
+
+def is_category_capital(ship_category):
+    if ship_category in util.capital_classes:
+        return True
+    else:
+        return False

@@ -179,6 +179,7 @@ def systemboard():
 def positivity_redirect():
     return redirect("/positivity/corp", code=302)
 
+
 @routes.route('/positivity/<mode>')
 def positivity(mode):
     poz_col, neg_col = util.get_mode_columns(mode)
@@ -215,6 +216,7 @@ def positivity(mode):
 def bullying_redirect():
     return redirect("/bullying/corp", code=302)
 
+
 @routes.route('/bullying/<mode>')
 def bullying(mode):
     poz_col, neg_col = util.get_mode_columns(mode)
@@ -229,6 +231,57 @@ def bullying(mode):
                                         LIMIT 500
     '''))
     return render_template('bullying.html', title="bullying olympics", bullies=bullies, mode=mode, poz=poz_col, neg=neg_col)
+
+
+@routes.route('/spaceteam/stats/<sheet_id>')
+def spaceteam_stats(sheet_id):
+    base_url = util.spaceteam_make_base_url(sheet_id)
+    metadata = util.spaceteam_get_metadata(sheet_id)
+    events = util.spaceteam_get_events(sheet_id)
+    meta_validation = util.spaceteam_validate_metadata(metadata)
+    event_validation = util.spaceteam_validate_events(events)
+    if not meta_validation and not event_validation:
+        return redirect(f"/spaceteam/check/{sheet_id}", code=301)
+
+    corps = util.spaceteam_get_corps(sheet_id)
+    teams = util.spaceteam_get_teams(corps)
+    alliances = util.spaceteam_get_alliances(corps)
+
+    params = {
+        'start_date': util.date_to_timestamp(metadata['start_date']),
+        'end_date': util.date_to_timestamp(metadata['end_date']) if metadata['end_date'] else int(
+            datetime.now(timezone.utc).timestamp())
+    }
+
+    kms = db.session.execute(text(f'''
+                                    SELECT *
+                                    FROM Killmails
+                                    WHERE timestamp > :start_date AND timestamp < :end_date
+                                    ORDER BY timestamp
+    '''), params=params).fetchall()
+
+    team_kms = util.spaceteam_kms_to_teams(kms, corps, teams)
+    team_stats = util.spaceteam_all_team_stats(team_kms)
+    
+
+    return render_template('spaceteam.html', title="spaceteams", team_kms=team_kms, team_stats=team_stats, teams=teams, alliances=alliances, subcaps=util.subcap_classes, caps=util.capital_classes)
+
+
+@routes.route('/spaceteam/check/<sheet_id>')
+def checkteam(sheet_id):
+    base_url = util.spaceteam_make_base_url(sheet_id)
+    events_url = util.spaceteam_make_event_url(sheet_id)
+    metadata = util.spaceteam_get_metadata(sheet_id)
+    events = util.spaceteam_get_events(sheet_id)
+    meta_validation = util.spaceteam_validate_metadata(metadata)
+    event_validation = util.spaceteam_validate_events(events)
+    corps = util.spaceteam_get_corps(sheet_id)
+    teams = util.spaceteam_get_teams(corps)
+    alliances = util.spaceteam_get_alliances(corps)
+    corp_ranges = util.spaceteam_get_all_corp_ranges(corps)
+    return render_template('checkteam.html', title="spaceteams", base_url=base_url, events_url=events_url, metadata=metadata, 
+                           meta_validation=meta_validation, event_validation=event_validation, 
+                           corps=corps, teams=teams, alliances=alliances, events=events, ranges=corp_ranges)
 
 
 @routes.route('/timeline/pilot/<pilot>')
@@ -349,11 +402,7 @@ def api_timeline_corp(corp):
     return make_response(result_json, 200)
 
 
-structure_classes = ['Capsuleer Outpost', 'Corporation Outpost I',
-                     'Corporation Outpost II', 'Ansiblex Stargate', 'Analytical Computer',
-                     'Anomaly Observation Array', 'Base Detection Array', 'Bounty Management Center',
-                     'Cynosural Beacon Tower', 'Cynosural Jammer Tower', 'Insurance Office', 'Pirate Detection Array',
-                     'Space Lab', 'Tax Center']
+
 
 
 @routes.route('/api/timeline/shipsonly/pilot/<pilot>')
@@ -377,7 +426,7 @@ def api_timeline_shipsonly_pilot(pilot):
     cur = 0
     dataset = []
     for kill in merge:
-        if kill[1] in structure_classes:
+        if kill[1] in util.structure_classes:
             continue
         dataset.append({'date': int(kill[2]) * 1000, 'ship': kill[1],
                        'shipval': kill[0], 'isk': cur + kill[0], 'url': kill[3]})
@@ -407,7 +456,7 @@ def api_timeline_shipsonly_corp(corp):
     cur = 0
     dataset = []
     for kill in merge:
-        if kill[1] in structure_classes:
+        if kill[1] in util.structure_classes:
             continue
         dataset.append({'date': int(kill[2]) * 1000, 'ship': kill[1],
                        'shipval': kill[0], 'isk': cur + kill[0], 'url': kill[3]})

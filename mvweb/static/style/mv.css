@@ -13,7 +13,7 @@ body {
 }
 
 .hp-toggle.hidden {
-    display: none !important; 
+    display: none !important;
 }
 
 .iconcolumn {
@@ -309,4 +309,38 @@ nav {
 .navlink {
     color: inherit;
     /* text-decoration: none; */
+}
+
+.cards {
+    display: flex;
+    justify-content: center;
+}
+
+.card {
+    margin: 50px;
+    padding: 20px;
+    border: 1px #dddddd solid;
+}
+
+.statsection {
+    padding-bottom: 1em;
+}
+
+.teamname {
+    text-align: center;
+    size: 4em;
+    padding-bottom: 2em;
+}
+
+.total {
+    display: block;
+}
+.statheader {
+    text-align: center;
+    font-weight: bold;
+    display: block;
+}
+
+.stat {
+    display: block;
 }
