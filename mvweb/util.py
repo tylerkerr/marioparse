@@ -452,8 +452,6 @@ def spaceteam_get_events(sheet_id):
         # 10 minute cache time
         if get_now_stamp() - spaceteam_event_cache[sheet_id]['timestamp'] < 60 * 10:
             return spaceteam_event_cache[sheet_id]['events']
-    else:
-        print(f"event cache miss {sheet_id} is new to us")
     base_url = spaceteam_make_base_url(sheet_id)
     events = list(DictReader(io.StringIO(
         get(spaceteam_make_event_url(base_url)).text)))
@@ -470,7 +468,6 @@ def spaceteam_get_events(sheet_id):
 
 def spaceteam_get_corps(sheet_id):
     corps = {}
-    base_url = spaceteam_make_base_url(sheet_id)
     events = spaceteam_get_events(sheet_id)
 
     for e in events:

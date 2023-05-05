@@ -271,6 +271,10 @@ def spaceteam_stats(sheet_id):
         if util.get_now_stamp() - team_km_cache[sheet_id]['timestamp'] < 60 * 10:
             team_kms = team_km_cache[sheet_id]['cache']
             data_age = util.timestamp_minutes_old(team_km_cache[sheet_id]['timestamp'])
+        else:
+            team_kms = util.spaceteam_kms_to_teams(kms, corps, teams)
+            team_km_cache[sheet_id] = {'timestamp': util.get_now_stamp(), 'cache': team_kms}
+            data_age = 0
     else:
         team_kms = util.spaceteam_kms_to_teams(kms, corps, teams)
         team_km_cache[sheet_id] = {'timestamp': util.get_now_stamp(), 'cache': team_kms}
