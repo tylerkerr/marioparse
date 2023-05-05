@@ -45,7 +45,7 @@
                     {% for alliance in teams[team]['alliances']|alphasort %}
                         {% if alliance != 'Naked' %}<span class="corplist"><b>{{ alliance }}</b> ({{ ', '.join(teams[team]['alliances'][alliance]|alphasort) }})</span>{% endif %}
                     {% endfor %}
-                    <span class="corplist"><b>Other</b> ({{ ', '.join(teams[team]['alliances']['Naked']|alphasort) }})</span>
+                    {% if teams[team]['alliances']['Naked'] %}<span class="corplist"><b>Other</b> ({{ ', '.join(teams[team]['alliances']['Naked']|alphasort) }})</span>{% endif %}
                 </div>
             </div>
         </article>
