@@ -316,6 +316,12 @@ nav {
     justify-content: center;
 }
 
+@media (max-width: 800px) {
+    .cards {
+        flex-direction: column;
+    }
+}
+
 .metacard {
     margin: 10px 50px 10px 50px;
     padding: 10px;
@@ -359,6 +365,12 @@ nav {
     margin-right: auto;
 }
 
+@media (max-width: 800px) {
+    .metadata {
+        width: 75%;
+    }
+}
+
 .infosection {
     text-align: center;
 }
@@ -378,4 +390,9 @@ nav {
     font-weight: bold;
     display: block;
     padding-top: 0.25em;
+}
+
+.corplist {
+    font-size: 12px;
+    display: block;
 }

@@ -39,6 +39,15 @@
                         <span class="stat">{{ team_stats[team]['Citadel'] }} {{ 'Capsuleer Outpost'|pluralize(team_stats[team]['Citadel']) }}</span>
                 </div>
             </div>
+            <div class="alliancelist">
+                <span class="statheader hp-toggle hp-control" data-group="participantlist"><u>{{ 'Final' if metadata['end_date'] else 'Current' }} members</u></span>
+                <div class="hp-toggle hidden" data-group="participantlist">
+                    {% for alliance in teams[team]['alliances']|alphasort %}
+                        {% if alliance != 'Naked' %}<span class="corplist"><b>{{ alliance }}</b> ({{ ', '.join(teams[team]['alliances'][alliance]|alphasort) }})</span>{% endif %}
+                    {% endfor %}
+                    <span class="corplist"><b>Other</b> ({{ ', '.join(teams[team]['alliances']['Naked']|alphasort) }})</span>
+                </div>
+            </div>
         </article>
         {% endfor %}
     </section>

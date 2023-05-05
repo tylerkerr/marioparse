@@ -279,7 +279,7 @@ def spaceteam_stats(sheet_id):
         team_kms = util.spaceteam_kms_to_teams(kms, corps, teams)
         team_km_cache[sheet_id] = {'timestamp': util.get_now_stamp(), 'cache': team_kms}
         data_age = 0
-    team_stats = util.spaceteam_all_team_stats(team_kms)
+    team_stats = util.spaceteam_all_team_stats(team_kms) 
 
     return render_template('spaceteam.html', title="spaceteams", metadata=metadata, team_kms=team_kms, data_age=data_age, team_stats=team_stats, teams=teams, alliances=alliances, subcaps=util.subcap_classes, caps=util.capital_classes, structures=util.spaceteam_structure_classes)
 

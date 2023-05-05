@@ -12,6 +12,7 @@ def register(jinja_env):
     jinja_env.filters['validate_event'] = validate_event
     jinja_env.filters['is_category_capital'] = is_category_capital
     jinja_env.filters['pluralize'] = pluralize
+    jinja_env.filters['alphasort'] = alphasort
 
 
 def urlify(text):
@@ -82,3 +83,7 @@ def pluralize(word, number):
         return word + 's'
     else:
         return word
+
+
+def alphasort(l):
+    return sorted(l)
