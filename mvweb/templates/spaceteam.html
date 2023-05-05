@@ -1,6 +1,17 @@
 {% extends "layout.html" %}
 {% block content %}
 
+<div class="metadata">
+    <article class="metacard">
+        <div class="infosection">Conflict: <b>{{ metadata['conflict'] }}</b></div>
+        <br />
+        <div class="infosection">Started {{ metadata['start_date'] }}</div>
+        <div class="infosection">Ended: {{ metadata['end_date'] if metadata['end_date'] else 'Ongoing' }}</div>
+        <div class="infosection">Moderator: {{ metadata['moderator'] }}</div>
+        <div class="infosection">Last updated: {{ data_age }} minutes ago</div>
+    </article>
+</div>
+
 <div class="spaceteam">
     <section class="cards">
         {% for team in team_kms %}
@@ -14,14 +25,18 @@
                 <div class="statsection">
                     <span class="statheader">Subcapital ships</span>
                     {% for stat in subcaps %}
-                        <span class="stat">{{ stat }} : {{ team_stats[team][stat] }}</span>
+                        <span class="stat">{{ team_stats[team][stat] }} {{ stat|pluralize(team_stats[team][stat]) }}</span>
                     {% endfor %}
                 </div>
                 <div class="statsection">
                     <span class="statheader">Capital ships</span>
                     {% for stat in caps %}
-                        <span class="stat">{{ stat }} : {{ team_stats[team][stat] }}</span>
+                        <span class="stat">{{ team_stats[team][stat] }} {{ stat|pluralize(team_stats[team][stat]) }}</span>
                     {% endfor %}
+                </div>
+                <div class="statsection">
+                    <span class="statheader">Structures</span>
+                        <span class="stat">{{ team_stats[team]['Citadel'] }} {{ 'Capsuleer Outpost'|pluralize(team_stats[team]['Citadel']) }}</span>
                 </div>
             </div>
         </article>

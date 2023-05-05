@@ -233,9 +233,16 @@ def bullying(mode):
     return render_template('bullying.html', title="bullying olympics", bullies=bullies, mode=mode, poz=poz_col, neg=neg_col)
 
 
+@routes.route('/spaceteam/')
+def spaceteams():
+    return render_template('spaceteam-index.html', title="spaceteams")
+
+
+team_km_cache = {}
+
+
 @routes.route('/spaceteam/stats/<sheet_id>')
 def spaceteam_stats(sheet_id):
-    base_url = util.spaceteam_make_base_url(sheet_id)
     metadata = util.spaceteam_get_metadata(sheet_id)
     events = util.spaceteam_get_events(sheet_id)
     meta_validation = util.spaceteam_validate_metadata(metadata)
@@ -260,11 +267,17 @@ def spaceteam_stats(sheet_id):
                                     ORDER BY timestamp
     '''), params=params).fetchall()
 
-    team_kms = util.spaceteam_kms_to_teams(kms, corps, teams)
+    if sheet_id in team_km_cache:
+        if util.get_now_stamp() - team_km_cache[sheet_id]['timestamp'] < 60 * 10:
+            team_kms = team_km_cache[sheet_id]['cache']
+            data_age = util.timestamp_minutes_old(team_km_cache[sheet_id]['timestamp'])
+    else:
+        team_kms = util.spaceteam_kms_to_teams(kms, corps, teams)
+        team_km_cache[sheet_id] = {'timestamp': util.get_now_stamp(), 'cache': team_kms}
+        data_age = 0
     team_stats = util.spaceteam_all_team_stats(team_kms)
-    
 
-    return render_template('spaceteam.html', title="spaceteams", team_kms=team_kms, team_stats=team_stats, teams=teams, alliances=alliances, subcaps=util.subcap_classes, caps=util.capital_classes)
+    return render_template('spaceteam.html', title="spaceteams", metadata=metadata, team_kms=team_kms, data_age=data_age, team_stats=team_stats, teams=teams, alliances=alliances, subcaps=util.subcap_classes, caps=util.capital_classes, structures=util.spaceteam_structure_classes)
 
 
 @routes.route('/spaceteam/check/<sheet_id>')
@@ -279,8 +292,8 @@ def checkteam(sheet_id):
     teams = util.spaceteam_get_teams(corps)
     alliances = util.spaceteam_get_alliances(corps)
     corp_ranges = util.spaceteam_get_all_corp_ranges(corps)
-    return render_template('checkteam.html', title="spaceteams", base_url=base_url, events_url=events_url, metadata=metadata, 
-                           meta_validation=meta_validation, event_validation=event_validation, 
+    return render_template('checkteam.html', title="spaceteams", base_url=base_url, events_url=events_url, metadata=metadata,
+                           meta_validation=meta_validation, event_validation=event_validation,
                            corps=corps, teams=teams, alliances=alliances, events=events, ranges=corp_ranges)
 
 
@@ -400,9 +413,6 @@ def api_timeline_corp(corp):
         cur = cur + kill[0]
     result_json = json.dumps(dataset)
     return make_response(result_json, 200)
-
-
-
 
 
 @routes.route('/api/timeline/shipsonly/pilot/<pilot>')

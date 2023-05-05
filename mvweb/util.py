@@ -382,14 +382,7 @@ def spaceteam_get_metadata(sheet_id):
     if sheet_id in spaceteam_metadata_cache:
         # 10 minute cache time
         if get_now_stamp() - spaceteam_metadata_cache[sheet_id]['timestamp'] < 60 * 10:
-            print(
-                f"metadata cache hit {sheet_id} {get_now_stamp() - spaceteam_metadata_cache[sheet_id]['timestamp']}s old")
             return spaceteam_metadata_cache[sheet_id]['metadata']
-        else:
-            print(
-                f"metadata cache miss {sheet_id} {get_now_stamp() - spaceteam_metadata_cache[sheet_id]['timestamp']}s old")
-    else:
-        print(f"metadata cache miss {sheet_id} is new to us")
     base_url = spaceteam_make_base_url(sheet_id)
     metadata_url = base_url + '&gid=0'
     metadata_in = get(metadata_url).text.splitlines()[1:]
@@ -458,12 +451,7 @@ def spaceteam_get_events(sheet_id):
     if sheet_id in spaceteam_event_cache:
         # 10 minute cache time
         if get_now_stamp() - spaceteam_event_cache[sheet_id]['timestamp'] < 60 * 10:
-            print(
-                f"event cache hit {sheet_id} {get_now_stamp() - spaceteam_event_cache[sheet_id]['timestamp']}s old")
             return spaceteam_event_cache[sheet_id]['events']
-        else:
-            print(
-                f"event cache miss {sheet_id} {get_now_stamp() - spaceteam_event_cache[sheet_id]['timestamp']}s old")
     else:
         print(f"event cache miss {sheet_id} is new to us")
     base_url = spaceteam_make_base_url(sheet_id)
@@ -585,9 +573,7 @@ def spaceteam_kms_to_teams(kms, corps, teams):
     for team in teams:
         if team:
             team_kms[team] = []
-
     corp_ranges = spaceteam_get_all_corp_ranges(corps)
-
     for km in kms:
         killer_corp = km._mapping['killer_corp']
         victim_corp = km._mapping['victim_corp']
@@ -595,10 +581,11 @@ def spaceteam_kms_to_teams(kms, corps, teams):
             if killer_corp in corps and victim_corp in corps:
                 killer_team = spaceteam_get_team_membership(
                     killer_corp, km._mapping['timestamp'], corp_ranges)
-                victim_team = spaceteam_get_team_membership(
-                    victim_corp, km._mapping['timestamp'], corp_ranges)
-                if killer_team and victim_team and killer_team != victim_team:
-                    team_kms[killer_team].append(km)
+                if killer_team:
+                    victim_team = spaceteam_get_team_membership(
+                        victim_corp, km._mapping['timestamp'], corp_ranges)
+                    if killer_team and victim_team and killer_team != victim_team:
+                        team_kms[killer_team].append(km)
 
     return team_kms
 
@@ -621,13 +608,20 @@ def spaceteam_all_team_stats(team_kms):
     return team_stats
 
 
+def timestamp_minutes_old(timestamp):
+    seconds_old = get_now_stamp() - timestamp
+    return int(divmod(seconds_old, 60)[0])
+
+
 structure_classes = ['Capsuleer Outpost', 'Corporation Outpost I',
                      'Corporation Outpost II', 'Ansiblex Stargate', 'Analytical Computer',
                      'Anomaly Observation Array', 'Base Detection Array', 'Bounty Management Center',
                      'Cynosural Beacon Tower', 'Cynosural Jammer Tower', 'Insurance Office', 'Pirate Detection Array',
                      'Space Lab', 'Tax Center']
-# structure_classes = ['Citadel']
-subcap_classes = ['Capsule', 'Shuttle', 'Frigate', 'Destroyer', 'Cruiser', 'Battlecruiser', 'Battleship', 'Industrial Ship']
+spaceteam_structure_classes = ['Citadel']
+spaceteam_structure_classes += structure_classes
+subcap_classes = ['Capsule', 'Shuttle', 'Frigate', 'Destroyer',
+                  'Cruiser', 'Battlecruiser', 'Battleship', 'Industrial Ship']
 capital_classes = ['Carrier', 'Dreadnought',  'Force Auxiliary', 'Freighter',
                    'Jump Freighter', 'Capital Industrial Ship', 'Versatile Assault Ship']
 

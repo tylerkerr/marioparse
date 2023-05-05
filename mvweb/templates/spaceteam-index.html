@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="spaceteam">
+    <section class="cards">
+
+        <article class="card">
+            <div class="howtotop"><b>How To Make Your Own Isk War</b></div>
+            <div class="teamstats">
+                <div class="howtosection">
+                    <span class="howtoheader">Step 1</span>
+                    <p>Make a copy of <a style="color: inherit;" href="https://docs.google.com/spreadsheets/d/1FUV82d2GyLkwvbUyF8NjYjQ96cZofxcCm7lzGJC33WQ/edit?usp=sharing">this template Google Sheet</a></p>
+                </div>
+                <hr>
+                <div class="howtosection">
+                    <span class="howtoheader">Step 2</span>
+                    <p>Edit the metadata sheet to reflect the conflict you're describing</p>
+                </div>
+                <hr>
+                <div class="howtosection">
+                    <span class="howtoheader">Step 3</span>
+                    <p>Edit the events sheet to describe the dates each corp joined/left the war.</p>
+                    <p>Alliance tags are optional - providing them with join events allows the compilation of a hierarchical list of war participants.</p>
+                    <p>Theres's no need to provide alliance tags with leave events, it doesn't do anything</p>
+                </div>
+                <hr>
+                <div class="howtosection">
+                    <span class="howtoheader">Step 4</span>
+                    <p>Publish the sheet as CSV:</p>
+                    <p>File menu -> Share -> Publish to web</p>
+                    <p>Entire Document: Comma-separated values (.csv)</p>
+                    <p>Press Publish and confirm</p>
+                </div>
+                <hr>
+                <div class="howtosection">
+                    <span class="howtoheader">Step 5</span>
+                    <p>Take the new link provided in the Publish window, and extract the ID from it. The ID is the long series of characters after <code>/spreadsheets/d/e/</code> and before <code>/pub?</code></p>
+                    <p>For example, in the template URL:</p>
+                    <pre>https://docs.google.com/spreadsheets/d/e/<span style="color: red; font-weight: bold;">2PACX-1vTGA3BrnYMt0_l7ZxvX2K6_zLZRiXK4nEYwuBxoQGHDaiQZcWqSJWO-JifVBRs0iWVtAZzMq2hUv3ku</span>/pub?output=csv</pre>
+                    <p>The ID is the bold red section. Copy the ID</p>
+                </div>
+                <hr>
+                <div class="howtosection">
+                    <span class="howtoheader">Step 6</span>
+                    <p>Paste the ID after</p>
+                    <pre>https://marioview.honk.click/spaceteam/stats/</pre> 
+                    <p>Now you have the URL to your new isk war website</p>
+                </div>
+                <hr>
+                <div class="howtosection">
+                    <span class="howtoheader">Notes</span>
+                    <p>There's a 10 minute cache timer on each sheet ID - if you make a change on the Google Sheet, it can take up to 10 minutes to reflect on the Spaceteam view.</p>
+                    <p>If your sheet seems like it isn't working right, you can replace <code>/stats/</code> with <code>/check/</code> for a debug output.</p>
+                    <p>If your sheet is REALLY broken, you'll get auto redirected to the check interface.</p>
+                    <p>The spaceteam stats that this site provides are calculated solely from the echoes.mobi dataset and whichever corresponding team event sheet you're looking at. If you don't like it just make your own</p>
+                </div>
+            </div>
+        </article>
+    </section>
+</div>
+
+
+
+{% endblock %}

@@ -316,8 +316,15 @@ nav {
     justify-content: center;
 }
 
+.metacard {
+    margin: 10px 50px 10px 50px;
+    padding: 10px;
+    border: 1px #dddddd solid;
+    font-size: 11px;
+}
+
 .card {
-    margin: 50px;
+    margin: 10px 50px 10px 50px;
     padding: 20px;
     border: 1px #dddddd solid;
 }
@@ -339,8 +346,36 @@ nav {
     text-align: center;
     font-weight: bold;
     display: block;
+    padding-bottom: 0.25em;
 }
 
 .stat {
     display: block;
+}
+
+.metadata {
+    width: 25%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.infosection {
+    text-align: center;
+}
+
+.howtosection {
+    text-align: center;
+}
+
+.howtotop {
+    font-size: 24px;
+    text-align: center;
+    padding-bottom: 1em;
+}
+
+.howtoheader {
+    text-align: center;
+    font-weight: bold;
+    display: block;
+    padding-top: 0.25em;
 }

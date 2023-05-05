@@ -11,6 +11,7 @@ def register(jinja_env):
     jinja_env.filters['rewrite_limit'] = rewrite_limit
     jinja_env.filters['validate_event'] = validate_event
     jinja_env.filters['is_category_capital'] = is_category_capital
+    jinja_env.filters['pluralize'] = pluralize
 
 
 def urlify(text):
@@ -72,3 +73,12 @@ def is_category_capital(ship_category):
         return True
     else:
         return False
+
+
+def pluralize(word, number):
+    if number == 0 or number > 1:
+        if word[-1] == 'y':
+            word = word[:-1] + 'ie'
+        return word + 's'
+    else:
+        return word
