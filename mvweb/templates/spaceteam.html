@@ -41,7 +41,7 @@
             </div>
             <div class="alliancelist">
                 <span class="statheader hp-toggle hp-control" data-group="participantlist"><u>{{ 'Final' if metadata['end_date'] else 'Current' }} members</u></span>
-                <div class="hp-toggle hidden" data-group="participantlist">
+                <div class="hp-toggle hp-display hidden" data-group="participantlist">
                     {% for alliance in teams[team]['alliances']|alphasort %}
                         {% if alliance != 'Naked' %}<span class="corplist"><b>{{ alliance }}</b> ({{ ', '.join(teams[team]['alliances'][alliance]|alphasort) }})</span>{% endif %}
                     {% endfor %}
