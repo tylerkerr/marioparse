@@ -219,7 +219,7 @@ def update_month_status(month):
 
 def write_km_dict(km_dict):
     c.executemany('''
-                INSERT OR IGNORE INTO "Killmails"
+                INSERT OR REPLACE INTO "Killmails"
                 (id, report_id, killer_corp, killer_name, isk, date_killed,
                  image_url, victim_ship_type, victim_ship_category, external_provider,
                  victim_name, victim_corp, system, constellation, region,
