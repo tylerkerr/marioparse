@@ -11,7 +11,7 @@
 {% for row in score %}
     <tr>
         <td>{{ count.value }}</td>
-        <td><a href="/search?{{ poz }}={{ row }}" class="tablelink">{{ row }}</a></td>
+        <td><a href="/search?{{ poz if score[row] > 0 else neg }}={{ row }}" class="tablelink">{{ row }}</a></td>
         <td>{{ "{:,}".format(score[row]) }}</td>
     </tr>
     {% set count.value = count.value + 1 %}
