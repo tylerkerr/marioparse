@@ -270,16 +270,19 @@ def spaceteam_stats(sheet_id):
     if sheet_id in team_km_cache:
         if util.get_now_stamp() - team_km_cache[sheet_id]['timestamp'] < 60 * 10:
             team_kms = team_km_cache[sheet_id]['cache']
-            data_age = util.timestamp_minutes_old(team_km_cache[sheet_id]['timestamp'])
+            data_age = util.timestamp_minutes_old(
+                team_km_cache[sheet_id]['timestamp'])
         else:
             team_kms = util.spaceteam_kms_to_teams(kms, corps, teams)
-            team_km_cache[sheet_id] = {'timestamp': util.get_now_stamp(), 'cache': team_kms}
+            team_km_cache[sheet_id] = {
+                'timestamp': util.get_now_stamp(), 'cache': team_kms}
             data_age = 0
     else:
         team_kms = util.spaceteam_kms_to_teams(kms, corps, teams)
-        team_km_cache[sheet_id] = {'timestamp': util.get_now_stamp(), 'cache': team_kms}
+        team_km_cache[sheet_id] = {
+            'timestamp': util.get_now_stamp(), 'cache': team_kms}
         data_age = 0
-    team_stats = util.spaceteam_all_team_stats(team_kms) 
+    team_stats = util.spaceteam_all_team_stats(team_kms)
 
     return render_template('spaceteam.html', title="spaceteams", metadata=metadata, team_kms=team_kms, data_age=data_age, team_stats=team_stats, teams=teams, alliances=alliances, subcaps=util.subcap_classes, caps=util.capital_classes, structures=util.spaceteam_structure_classes)
 
@@ -311,6 +314,11 @@ def timeline_corp(corp):
     return render_template('timeline.html', title="timeline", type="corp", lookup=corp)
 
 
+@routes.route('/timeline/ship/<ship>')
+def timeline_ship(ship):
+    return render_template('timeline.html', title="timeline", type="ship", lookup=ship)
+
+
 @routes.route('/timeline/shipsonly/pilot/<pilot>')
 def timeline_pilot_shipsonly(pilot):
     return render_template('timeline.html', title="timeline", type="shipsonly/pilot", lookup=pilot)
@@ -319,6 +327,11 @@ def timeline_pilot_shipsonly(pilot):
 @routes.route('/timeline/shipsonly/corp/<corp>')
 def timeline_corp_shipsonly(corp):
     return render_template('timeline.html', title="timeline", type="shipsonly/corp", lookup=corp)
+
+
+@routes.route('/timeline/shipsonly/ship/<ship>')
+def timeline_ship_shipsonly(ship):
+    return render_template('timeline.html', title="timeline", type="shipsonly/ship", lookup=ship)
 
 
 @routes.route('/alltime')
@@ -412,6 +425,84 @@ def api_timeline_corp(corp):
     cur = 0
     dataset = []
     for kill in merge:
+        dataset.append({'date': int(kill[2]) * 1000, 'ship': kill[1],
+                       'shipval': kill[0], 'isk': cur + kill[0], 'url': kill[3]})
+        cur = cur + kill[0]
+    result_json = json.dumps(dataset)
+    return make_response(result_json, 200)
+
+
+bombers = ('Purifier', 'Purifier II', 'Purifier III',
+           'Manticore', 'Manticore II', 'Manticore III',
+           'Nemesis', 'Nemesis II', 'Nemesis III',
+           'Hound', 'Hound II', 'Hound III')
+
+
+@routes.route('/api/timeline/ship/<ship>')
+def api_timeline_ship(ship):
+    if ship.lower() == 'bombers':
+        params = {'ship': bombers}
+        ship_op = 'IN'
+        ship_value = "('" + "','".join(bombers) + "')"
+    else:
+        params = {'ship': ship}
+        ship_op = 'LIKE'
+        ship_value = ':ship'
+    kill_rows = db.session.execute(text(f'''
+                                    SELECT isk, victim_ship_type, timestamp, image_url
+                                    FROM Killmails
+                                    WHERE killer_ship_type {ship_op} {ship_value}
+                                    ORDER BY timestamp
+    '''), params=params)
+    death_rows = db.session.execute(text(f'''
+                                    SELECT isk, victim_ship_type, timestamp, image_url
+                                    FROM Killmails
+                                    WHERE victim_ship_type {ship_op} {ship_value}
+                                    ORDER BY timestamp
+    '''), params=params)
+    kills = [tuple(row) for row in kill_rows]
+    deaths = [(row[0] * -1, row[1], row[2], row[3]) for row in death_rows]
+    merge = sorted(kills + deaths, key=lambda x: x[2])
+    cur = 0
+    dataset = []
+    for kill in merge:
+        dataset.append({'date': int(kill[2]) * 1000, 'ship': kill[1],
+                       'shipval': kill[0], 'isk': cur + kill[0], 'url': kill[3]})
+        cur = cur + kill[0]
+    result_json = json.dumps(dataset)
+    return make_response(result_json, 200)
+
+
+@routes.route('/api/timeline/shipsonly/ship/<ship>')
+def api_timeline_shipsonly_ship(ship):
+    if ship.lower() == 'bombers':
+        params = {'ship': bombers}
+        ship_op = 'IN'
+        ship_value = "('" + "','".join(bombers) + "')"
+    else:
+        params = {'ship': ship}
+        ship_op = 'LIKE'
+        ship_value = ':ship'
+    kill_rows = db.session.execute(text(f'''
+                                    SELECT isk, victim_ship_type, timestamp, image_url
+                                    FROM Killmails
+                                    WHERE killer_ship_type {ship_op} {ship_value}
+                                    ORDER BY timestamp
+    '''), params=params)
+    death_rows = db.session.execute(text(f'''
+                                    SELECT isk, victim_ship_type, timestamp, image_url
+                                    FROM Killmails
+                                    WHERE victim_ship_type {ship_op} {ship_value}
+                                    ORDER BY timestamp
+    '''), params=params)
+    kills = [tuple(row) for row in kill_rows]
+    deaths = [(row[0] * -1, row[1], row[2], row[3]) for row in death_rows]
+    merge = sorted(kills + deaths, key=lambda x: x[2])
+    cur = 0
+    dataset = []
+    for kill in merge:
+        if kill[1] in util.structure_classes:
+            continue
         dataset.append({'date': int(kill[2]) * 1000, 'ship': kill[1],
                        'shipval': kill[0], 'isk': cur + kill[0], 'url': kill[3]})
         cur = cur + kill[0]

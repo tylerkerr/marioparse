@@ -41,7 +41,9 @@ def is_faction(shipname):
                             'worm', 'gila', 'rattlesnake',
                             'daredevil', 'vigilant', 'vindicator',
                             'dramiel', 'cynabal', 'machariel',
-                            'cruor', 'ashimmu', 'bhaalgorn']:
+                            'cruor', 'ashimmu', 'bhaalgorn',
+                            'fiend', 'chameleon', 'saleon',
+                            'adrestia']:
         return True
     return False
 
