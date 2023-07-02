@@ -201,7 +201,7 @@ def gen_select(start, end, params):
     return query
 
 
-def snuggly_check_corp(corp):
+def snuggly_calc_corp(corp):
     if not corp:
         return None
     param = {'corp': corp}
@@ -228,7 +228,7 @@ def snuggly_check_corp(corp):
     return snuggly
 
 
-def snuggly_check_pilot(pilot):
+def snuggly_calc_pilot(pilot):
     if not pilot:
         return None
     param = {'pilot': pilot}
@@ -255,7 +255,7 @@ def snuggly_check_pilot(pilot):
     return snuggly
 
 
-def snuggly_string(snuggly):
+def stat_percent_string(snuggly):
     if snuggly == 0:
         stringout = '0'
     elif snuggly == 1.0:
@@ -270,20 +270,20 @@ def snuggly_string(snuggly):
 snuggly_corp_memo = {}
 
 
-def snuggly_string_corp(corp):
+def snuggly_lookup_corp(corp):
     if corp in snuggly_corp_memo:
         return snuggly_corp_memo[corp]
-    snuggly_corp_memo[corp] = snuggly_string(snuggly_check_corp(corp))
+    snuggly_corp_memo[corp] = stat_percent_string(snuggly_calc_corp(corp))
     return snuggly_corp_memo[corp]
 
 
 snuggly_pilot_memo = {}
 
 
-def snuggly_string_pilot(pilot):
+def snuggly_lookup_pilot(pilot):
     if pilot in snuggly_pilot_memo:
         return snuggly_pilot_memo[pilot]
-    snuggly_pilot_memo[pilot] = snuggly_string(snuggly_check_pilot(pilot))
+    snuggly_pilot_memo[pilot] = stat_percent_string(snuggly_calc_pilot(pilot))
     return snuggly_pilot_memo[pilot]
 
 
@@ -621,6 +621,77 @@ subcap_classes = ['Capsule', 'Shuttle', 'Frigate', 'Destroyer',
                   'Cruiser', 'Battlecruiser', 'Battleship', 'Industrial Ship']
 capital_classes = ['Carrier', 'Dreadnought',  'Force Auxiliary', 'Freighter',
                    'Jump Freighter', 'Capital Industrial Ship', 'Versatile Assault Ship']
+
+
+def lowsec_calc_pilot(pilot):
+    if not pilot:
+        return None
+    param = {'pilot': pilot}
+    kills = db.session.execute(text('''
+                                        SELECT killer_name, isk, system
+                                        FROM Killmails
+                                        WHERE killer_name = :pilot
+                                       '''), param).fetchall()
+
+    total_null = 0
+    total_low = 0
+
+    for kill in kills:
+        if get_sec_status(get_rounded_sec(kill[2])) == 'lowsec':
+            total_low += kill[1]
+        else:
+            total_null += kill[1]
+
+    lowsec_rating = round(
+        total_low / (total_null + total_low), 3) if total_null else 1
+
+    return lowsec_rating
+
+
+lowsec_pilot_memo = {}
+
+
+def lowsec_lookup_pilot(pilot):
+    if pilot in lowsec_pilot_memo:
+        return lowsec_pilot_memo[pilot]
+    lowsec_pilot_memo[pilot] = stat_percent_string(lowsec_calc_pilot(pilot))
+    return lowsec_pilot_memo[pilot]
+
+
+def lowsec_calc_corp(corp):
+    if not corp:
+        return None
+    param = {'corp': corp}
+    kills = db.session.execute(text('''
+                                        SELECT killer_corp, isk, system
+                                        FROM Killmails
+                                        WHERE killer_corp = :corp
+                                       '''), param).fetchall()
+
+    total_null = 0
+    total_low = 0
+
+    for kill in kills:
+        if get_sec_status(get_rounded_sec(kill[2])) == 'lowsec':
+            total_low += kill[1]
+        else:
+            total_null += kill[1]
+
+    lowsec_rating = round(
+        total_low / (total_null + total_low), 3) if total_null else 1
+
+    return lowsec_rating
+
+
+lowsec_corp_memo = {}
+
+
+def lowsec_lookup_corp(corp):
+    if corp in lowsec_corp_memo:
+        return lowsec_corp_memo[corp]
+    lowsec_corp_memo[corp] = stat_percent_string(lowsec_calc_corp(corp))
+    return lowsec_corp_memo[corp]
+
 
 global truesec
 truesec = parse_truesec_csv()

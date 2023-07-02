@@ -28,15 +28,15 @@ body {
     text-shadow: 1px 1px 10px #fff;
 }
 
-.hisec .tablelink {
+.hisec {
     color: #24e576;
 }
 
-.lowsec .tablelink {
+.lowsec {
     color: #cd7d3c;
 }
 
-.nullsec .tablelink {
+.nullsec {
     color: #b50000;
 }
 

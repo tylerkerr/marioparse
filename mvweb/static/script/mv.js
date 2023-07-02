@@ -26,9 +26,6 @@ window.addEventListener('DOMContentLoaded', function () {
             xhr.onreadystatechange = function () {
               if (xhr.readyState == XMLHttpRequest.DONE) {
                 xresp = xhr.responseText;
-                if (xresp != 'n/a') {
-                  xresp += '% snuggly';
-                }
                 sessionStorage.setItem('corp-' + corp, xresp)
                 tipDiv.innerHTML = sessionStorage.getItem('corp-' + corp)
                 if (tipDiv.dataset.moused === '1') {
@@ -79,9 +76,6 @@ window.addEventListener('DOMContentLoaded', function () {
                   xresp = xhr.responseText;
                 } else {
                   xresp = 'n/a'
-                }
-                if (xresp != 'n/a') {
-                  xresp += '% snuggly';
                 }
                 sessionStorage.setItem('pilot-' + pilot, xresp)
                 tipDiv.innerHTML = sessionStorage.getItem('pilot-' + pilot)

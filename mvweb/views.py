@@ -368,12 +368,32 @@ def destruction():
 
 @routes.route('/api/snuggly/pilot/<pilot>')
 def api_snuggly_pilot(pilot):
-    return make_response(util.snuggly_string_pilot(pilot), 200)
+    snug = util.snuggly_lookup_pilot(pilot)
+    # if float(snug) == 100:
+    #     span = '<span class="hisec">'
+    # elif 50 < float(snug) < 100:
+    #     span = '<span class="lowsec">'
+    # else:
+    #     span = '<span class="nullsec">'
+    resp = '<div>' + snug + "%</span> snuggly</div>"
+    if snug != '100':
+        lowsec = util.lowsec_lookup_pilot(pilot)
+        # if float(lowsec) >= 50:
+        #     span = '<span class="lowsec">'
+        # else:
+        #     span = '<span class="nullsec">'
+        resp += '<div>' + lowsec + "%</span> lowsec</div>"
+    return make_response(resp, 200)
 
 
 @routes.route('/api/snuggly/corp/<corp>')
 def api_snuggly_corp(corp):
-    return make_response(util.snuggly_string_corp(corp), 200)
+    snug = util.snuggly_lookup_corp(corp)
+    resp = '<div>' + snug + "%</span> snuggly</div>"
+    if snug != '100':
+        lowsec = util.lowsec_lookup_corp(corp)
+        resp += '<div>' + lowsec + "%</span> lowsec</div>"
+    return make_response(resp, 200)
 
 
 @routes.route('/api/timeline/pilot/<pilot>')
