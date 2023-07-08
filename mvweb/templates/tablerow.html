@@ -20,7 +20,9 @@
             </div>
         {% endif -%}
     </td>
-    <td class="hideonmobile" ><a href="/search?killer_ship_type={{ km['killer_ship_type'] }}" class="tablelink">
+    <td class="hideonmobile" >
+        {% if km['killer_ship_type'] %}<a href="/timeline/ship/{{ km['killer_ship_type'] }}"><img class='smallicon' src="/static/img/timeseries.png"></a>{% endif %}
+        <a href="/search?killer_ship_type={{ km['killer_ship_type'] }}" class="tablelink">
         {{ '' if not km['killer_ship_type'] else km['killer_ship_type'] }}</a>
     </td>
     <td class="hideonmobile" >
@@ -50,7 +52,10 @@
             </div>
         {% endif -%}
     </td>
-    <td><a href="/search?victim_ship_type={{ km['victim_ship_type'] }}" class="tablelink">{{ '' if not km['victim_ship_type'] else  km['victim_ship_type'] }}</a></td>
+    <td>
+        {% if km['victim_ship_type'] %}<a href="/timeline/ship/{{ km['victim_ship_type'] }}"><img class='smallicon' src="/static/img/timeseries.png"></a>{% endif %}
+        <a href="/search?victim_ship_type={{ km['victim_ship_type'] }}" class="tablelink">{{ '' if not km['victim_ship_type'] else  km['victim_ship_type'] }}</a>
+    </td>
     <td class="hideonmobile" ><a href="/search?victim_ship_category={{ km['victim_ship_category'] }}" class="tablelink"><img src="/static/img/shipclass/
         {%- if km['victim_ship_category']|is_faction_possible %}
             {%- if km['victim_ship_type']|is_faction %}faction {% endif -%}

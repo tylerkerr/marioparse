@@ -25,29 +25,41 @@
                 <div class="statsection">
                     <span class="statheader">Subcapital ships</span>
                     {% for stat in subcaps %}
-                        <span class="stat">{{ team_stats[team][stat] }} {{ stat|pluralize(team_stats[team][stat]) }}</span>
+                    <span class="stat">{{ team_stats[team][stat] }} {{ stat|pluralize(team_stats[team][stat]) }}</span>
                     {% endfor %}
                 </div>
                 <div class="statsection">
                     <span class="statheader">Capital ships</span>
                     {% for stat in caps %}
-                        <span class="stat">{{ team_stats[team][stat] }} {{ stat|pluralize(team_stats[team][stat]) }}</span>
+                    <span class="stat">{{ team_stats[team][stat] }} {{ stat|pluralize(team_stats[team][stat]) }}</span>
                     {% endfor %}
                 </div>
                 <div class="statsection">
                     <span class="statheader">Structures</span>
-                        <span class="stat">{{ team_stats[team]['Citadel'] }} {{ 'Capsuleer Outpost'|pluralize(team_stats[team]['Citadel']) }}</span>
+                    <span class="stat">{{ team_stats[team]['Citadel'] }} {{ 'Capsuleer
+                        Outpost'|pluralize(team_stats[team]['Citadel']) }}</span>
                 </div>
             </div>
             <div class="alliancelist">
-                <span class="statheader hp-toggle hp-control" data-group="participantlist"><u>{{ 'Final' if metadata['end_date'] else 'Current' }} members</u></span>
+                <span class="statheader hp-toggle hp-control" data-group="participantlist"><u>{{ 'Final' if
+                        metadata['end_date'] else 'Current' }} members</u></span>
                 <div class="hp-toggle hp-display hidden" data-group="participantlist">
                     {% for alliance in teams[team]['alliances']|alphasort %}
-                        {% if alliance != 'Naked' %}<span class="corplist"><b>{{ alliance }}</b> ({{ ', '.join(teams[team]['alliances'][alliance]|alphasort) }})</span>{% endif %}
+                    {% if alliance != 'Naked' %}<span class="corplist"><b>{{ alliance }}</b> ({{ ',
+                        '.join(teams[team]['alliances'][alliance]|alphasort) }})</span>{% endif %}
                     {% endfor %}
-                    {% if teams[team]['alliances']['Naked'] %}<span class="corplist"><b>Other</b> ({{ ', '.join(teams[team]['alliances']['Naked']|alphasort) }})</span>{% endif %}
+                    {% if teams[team]['alliances']['Naked'] %}<span class="corplist"><b>Other</b> ({{ ',
+                        '.join(teams[team]['alliances']['Naked']|alphasort) }})</span>{% endif %}
                 </div>
             </div>
+            <br />
+            <u>
+                <a class="statheader tablelink"
+                    href="/search?killer_corp={{ teams[team]|team_corp_list }}&victim_corp={{ teams|other_teams_corp_list(team) }}&date_start={{ metadata['start_date'] }}{{ '&date_end=' + metadata['end_date'] if metadata['end_date'] else '' }}">
+                    all kills by this team
+                </a>
+            </u>
+
         </article>
         {% endfor %}
     </section>

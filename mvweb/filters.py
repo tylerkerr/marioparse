@@ -13,6 +13,8 @@ def register(jinja_env):
     jinja_env.filters['is_category_capital'] = is_category_capital
     jinja_env.filters['pluralize'] = pluralize
     jinja_env.filters['alphasort'] = alphasort
+    jinja_env.filters['team_corp_list'] = team_corp_list
+    jinja_env.filters['other_teams_corp_list'] = other_teams_corp_list
 
 
 def urlify(text):
@@ -89,3 +91,21 @@ def pluralize(word, number):
 
 def alphasort(l):
     return sorted(l)
+
+
+def team_corp_list(team):
+    corps = []
+    for alliance in team['alliances']:
+        for corp in team['alliances'][alliance]:
+            corps.append(corp)
+    return ','.join(corps)
+
+
+def other_teams_corp_list(teams, this_team):
+    corps = []
+    for team in teams:
+        if team != this_team:
+            for alliance in teams[team]['alliances']:
+                for corp in teams[team]['alliances'][alliance]:
+                    corps.append(corp)
+    return ','.join(corps)
