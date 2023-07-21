@@ -11,6 +11,7 @@ from requests import get
 from collections import defaultdict
 import io
 import pandas
+import json
 
 basedir = path.abspath(path.dirname(__file__))
 
@@ -699,3 +700,24 @@ global sec_lookup
 sec_lookup = {}
 global invalid_systems
 invalid_systems = []
+
+
+def filter_valid_system(sys):
+    if sys in truesec:
+        return True
+    else:
+        return False
+
+
+def map_all_kills():
+    query = db.session.execute(text('''
+                                        SELECT system, isk
+                                        FROM Killmails
+                                        GROUP BY system
+                                        ORDER BY sum(isk) desc
+                                       ''')).fetchall()
+    systems = {}
+    for sys in query:
+        if filter_valid_system(sys[0]):
+            systems[sys[0]] = sys[1]
+    return systems

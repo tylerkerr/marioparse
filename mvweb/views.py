@@ -684,3 +684,9 @@ def api_alltime_ships_csv():
         w.writerow(row)
 
     return make_response(csv.getvalue(), 200)
+
+
+@routes.route('/api/heatmap/all')
+def api_heatmap_all():
+    all_sys = util.map_all_kills()
+    return make_response(all_sys, 200)
