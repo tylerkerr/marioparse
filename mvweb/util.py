@@ -716,7 +716,27 @@ def map_all_kills():
                                         GROUP BY system
                                         ORDER BY sum(isk) desc
                                        ''')).fetchall()
-    systems ={}
+    systems = {}
+    for sys in query:
+        if filter_valid_system(sys[0]):
+            systems[sys[0]] = sys[1]
+    return systems
+
+
+def map_date_kills(date_start, date_end):
+    timestamp_start = date_to_timestamp(date_start)
+    timestamp_end = date_to_timestamp(date_end, end=True)
+    params = {'timestamp_start': timestamp_start,
+              'timestamp_end': timestamp_end}
+    query = db.session.execute(text('''
+                                        SELECT system, sum(isk)
+                                        FROM Killmails
+                                        WHERE timestamp >= :timestamp_start
+                                        AND timestamp <= :timestamp_end
+                                        GROUP BY system
+                                        ORDER BY sum(isk) desc
+                                       '''), params).fetchall()
+    systems = {}
     for sys in query:
         if filter_valid_system(sys[0]):
             systems[sys[0]] = sys[1]
@@ -732,7 +752,7 @@ def map_pilot_kills(pilot):
                                         GROUP BY system
                                         ORDER BY sum(isk) desc
                                        '''), param).fetchall()
-    systems ={}
+    systems = {}
     for sys in query:
         if filter_valid_system(sys[0]):
             systems[sys[0]] = sys[1]
@@ -748,7 +768,7 @@ def map_corp_kills(corp):
                                         GROUP BY system
                                         ORDER BY sum(isk) desc
                                        '''), param).fetchall()
-    systems ={}
+    systems = {}
     for sys in query:
         if filter_valid_system(sys[0]):
             systems[sys[0]] = sys[1]
@@ -764,7 +784,7 @@ def map_ship_kills(ship):
                                         GROUP BY system
                                         ORDER BY sum(isk) desc
                                        '''), param).fetchall()
-    systems ={}
+    systems = {}
     for sys in query:
         if filter_valid_system(sys[0]):
             systems[sys[0]] = sys[1]
@@ -780,7 +800,7 @@ def map_pilot_deaths(pilot):
                                         GROUP BY system
                                         ORDER BY sum(isk) desc
                                        '''), param).fetchall()
-    systems ={}
+    systems = {}
     for sys in query:
         if filter_valid_system(sys[0]):
             systems[sys[0]] = sys[1]
@@ -796,7 +816,7 @@ def map_corp_deaths(corp):
                                         GROUP BY system
                                         ORDER BY sum(isk) desc
                                        '''), param).fetchall()
-    systems ={}
+    systems = {}
     for sys in query:
         if filter_valid_system(sys[0]):
             systems[sys[0]] = sys[1]
@@ -812,7 +832,7 @@ def map_ship_deaths(ship):
                                         GROUP BY system
                                         ORDER BY sum(isk) desc
                                        '''), param).fetchall()
-    systems ={}
+    systems = {}
     for sys in query:
         if filter_valid_system(sys[0]):
             systems[sys[0]] = sys[1]

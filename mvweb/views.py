@@ -691,6 +691,11 @@ def api_heatmap_all():
     return make_response(util.map_all_kills(), 200)
 
 
+@routes.route('/api/heatmap/dates/<start>/<end>')
+def api_heatmap_dates(start, end):
+    return make_response(util.map_date_kills(start, end), 200)
+
+
 @routes.route('/api/heatmap/pilot/<pilot>/<mode>')
 def api_heatmap_pilot(pilot, mode):
     if mode == 'kills':
@@ -725,4 +730,3 @@ def api_heatmap_ship(ship, mode):
         return make_response(util.map_positivity_merge(util.map_ship_kills(ship), util.map_ship_deaths(ship)), 200)
     else:
         return "Very bad request", 400
-    
