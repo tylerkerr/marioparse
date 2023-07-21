@@ -711,12 +711,12 @@ def filter_valid_system(sys):
 
 def map_all_kills():
     query = db.session.execute(text('''
-                                        SELECT system, isk
+                                        SELECT system, sum(isk)
                                         FROM Killmails
                                         GROUP BY system
                                         ORDER BY sum(isk) desc
                                        ''')).fetchall()
-    systems = {}
+    systems ={}
     for sys in query:
         if filter_valid_system(sys[0]):
             systems[sys[0]] = sys[1]
