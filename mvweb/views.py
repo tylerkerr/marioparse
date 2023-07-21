@@ -688,5 +688,41 @@ def api_alltime_ships_csv():
 
 @routes.route('/api/heatmap/all')
 def api_heatmap_all():
-    all_sys = util.map_all_kills()
-    return make_response(all_sys, 200)
+    return make_response(util.map_all_kills(), 200)
+
+
+@routes.route('/api/heatmap/pilot/<pilot>/<mode>')
+def api_heatmap_pilot(pilot, mode):
+    if mode == 'kills':
+        return make_response(util.map_pilot_kills(pilot), 200)
+    elif mode == 'deaths':
+        return make_response(util.map_pilot_deaths(pilot), 200)
+    elif mode == 'positivity':
+        return make_response(util.map_positivity_merge(util.map_pilot_kills(pilot), util.map_pilot_deaths(pilot)), 200)
+    else:
+        return "Very bad request", 400
+
+
+@routes.route('/api/heatmap/corp/<corp>/<mode>')
+def api_heatmap_corp(corp, mode):
+    if mode == 'kills':
+        return make_response(util.map_corp_kills(corp), 200)
+    elif mode == 'deaths':
+        return make_response(util.map_corp_deaths(corp), 200)
+    elif mode == 'positivity':
+        return make_response(util.map_positivity_merge(util.map_corp_kills(corp), util.map_corp_deaths(corp)), 200)
+    else:
+        return "Very bad request", 400
+
+
+@routes.route('/api/heatmap/ship/<ship>/<mode>')
+def api_heatmap_ship(ship, mode):
+    if mode == 'kills':
+        return make_response(util.map_ship_kills(ship), 200)
+    elif mode == 'deaths':
+        return make_response(util.map_ship_deaths(ship), 200)
+    elif mode == 'positivity':
+        return make_response(util.map_positivity_merge(util.map_ship_kills(ship), util.map_ship_deaths(ship)), 200)
+    else:
+        return "Very bad request", 400
+    

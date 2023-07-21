@@ -721,3 +721,103 @@ def map_all_kills():
         if filter_valid_system(sys[0]):
             systems[sys[0]] = sys[1]
     return systems
+
+
+def map_pilot_kills(pilot):
+    param = {'pilot': pilot}
+    query = db.session.execute(text('''
+                                        SELECT system, sum(isk)
+                                        FROM Killmails
+                                        WHERE killer_name = :pilot
+                                        GROUP BY system
+                                        ORDER BY sum(isk) desc
+                                       '''), param).fetchall()
+    systems ={}
+    for sys in query:
+        if filter_valid_system(sys[0]):
+            systems[sys[0]] = sys[1]
+    return systems
+
+
+def map_corp_kills(corp):
+    param = {'corp': corp}
+    query = db.session.execute(text('''
+                                        SELECT system, sum(isk)
+                                        FROM Killmails
+                                        WHERE killer_corp = :corp
+                                        GROUP BY system
+                                        ORDER BY sum(isk) desc
+                                       '''), param).fetchall()
+    systems ={}
+    for sys in query:
+        if filter_valid_system(sys[0]):
+            systems[sys[0]] = sys[1]
+    return systems
+
+
+def map_ship_kills(ship):
+    param = {'ship': ship}
+    query = db.session.execute(text('''
+                                        SELECT system, sum(isk)
+                                        FROM Killmails
+                                        WHERE killer_ship_type = :ship
+                                        GROUP BY system
+                                        ORDER BY sum(isk) desc
+                                       '''), param).fetchall()
+    systems ={}
+    for sys in query:
+        if filter_valid_system(sys[0]):
+            systems[sys[0]] = sys[1]
+    return systems
+
+
+def map_pilot_deaths(pilot):
+    param = {'pilot': pilot}
+    query = db.session.execute(text('''
+                                        SELECT system, sum(isk)
+                                        FROM Killmails
+                                        WHERE victim_name = :pilot
+                                        GROUP BY system
+                                        ORDER BY sum(isk) desc
+                                       '''), param).fetchall()
+    systems ={}
+    for sys in query:
+        if filter_valid_system(sys[0]):
+            systems[sys[0]] = sys[1]
+    return systems
+
+
+def map_corp_deaths(corp):
+    param = {'corp': corp}
+    query = db.session.execute(text('''
+                                        SELECT system, sum(isk)
+                                        FROM Killmails
+                                        WHERE victim_corp = :corp
+                                        GROUP BY system
+                                        ORDER BY sum(isk) desc
+                                       '''), param).fetchall()
+    systems ={}
+    for sys in query:
+        if filter_valid_system(sys[0]):
+            systems[sys[0]] = sys[1]
+    return systems
+
+
+def map_ship_deaths(ship):
+    param = {'ship': ship}
+    query = db.session.execute(text('''
+                                        SELECT system, sum(isk)
+                                        FROM Killmails
+                                        WHERE victim_ship_type = :ship
+                                        GROUP BY system
+                                        ORDER BY sum(isk) desc
+                                       '''), param).fetchall()
+    systems ={}
+    for sys in query:
+        if filter_valid_system(sys[0]):
+            systems[sys[0]] = sys[1]
+    return systems
+
+
+def map_positivity_merge(kills, deaths):
+    return {k: kills.get(k, 0) + (deaths.get(k, 0) * -1) for k in set(kills) | set(deaths)}
