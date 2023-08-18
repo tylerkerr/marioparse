@@ -48,6 +48,7 @@
                     <a href="{{ url_for('views.top_day') }}" class="{% if nav == 'top/day' %}active{% endif %} navlink"><span class="name">d</span></a>/<a href="{{ url_for('views.top_week') }}" class="{% if nav == 'top/week' %}active{% endif %} navlink"><span class="name">w</span></a>/<a href="{{ url_for('views.top_month') }}" class="{% if nav == 'top/month' %}active{% endif %} navlink"><span class="name">m</span></a>
                     <a href="{{ url_for('views.positivity', mode='corp') }}" class="{% if nav == 'positivity' %}active{% endif %} navlink"><span class="name">positivity</span></a>
                     <a href="{{ url_for('views.bullying', mode='corp') }}" class="{% if nav == 'bullying' %}active{% endif %} navlink"><span class="name">bullying</span></a>
+                    <a href="{{ url_for('views.heatmap', mode='corp') }}" class="{% if nav == 'heatmap' %}active{% endif %} navlink"><span class="name">map</span></a>
                     <a href="https://honk.click/discord" class="navlink" target="_blank">discord</a>
                     <a href="https://echoes.mobi" class="navlink" target="_blank">echoes.mobi</a>
                 </div>
@@ -62,5 +63,5 @@
     <script src="/static/script/moment-tz.js?h={{ config['STATIC_HASH'] }}"></script>
     <script src="/static/script/tablesort.js?h={{ config['STATIC_HASH'] }}"></script>
     <script src="/static/script/tablesort.number.min.js?h={{ config['STATIC_HASH'] }}"></script>
-    <p class="footer">Rendered in {{ g.request_time() }}</p>
+    {% if request.path != '/heatmap' %}<p class="footer">Rendered in {{ g.request_time() }}</p>{% endif %}
 </body>

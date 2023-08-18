@@ -363,6 +363,13 @@ def destruction():
     return render_template('destruction.html', title="destruction", months=results)
 
 
+
+@routes.route('/heatmap')
+def heatmap():
+    return render_template('tsukimap.html', title="heatmap")
+
+
+
 # api
 
 
