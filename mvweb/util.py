@@ -621,7 +621,7 @@ spaceteam_structure_classes += structure_classes
 subcap_classes = ['Capsule', 'Shuttle', 'Frigate', 'Destroyer',
                   'Cruiser', 'Battlecruiser', 'Battleship', 'Industrial Ship']
 capital_classes = ['Carrier', 'Dreadnought',  'Force Auxiliary', 'Freighter',
-                   'Jump Freighter', 'Capital Industrial Ship', 'Versatile Assault Ship']
+                   'Jump Freighter', 'Capital Industrial Ship', 'Versatile Assault Ship', 'Supercarrier']
 
 
 def lowsec_calc_pilot(pilot):
