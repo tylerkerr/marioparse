@@ -43,11 +43,15 @@ db_filename = 'km.db'
 db_name = this_path + '/' + db_filename
 baseurl = 'https://echoes.mobi/killboard/export'
 headers = {
-    'User-Agent': 'honk-mariobot-parse/0.1 (bearand#4133@discord)'
+    'User-Agent': 'honk-mariobot-parse/0.1 (bearand@discord)'
 }
 
 launch_date = "2020-08-13"
 
+with open('ignore.json') as ignorejson:
+    ignore_kms = json.load(ignorejson)
+
+print(ignore_kms)
 
 # database setup
 
@@ -217,6 +221,14 @@ def update_month_status(month):
     conn.commit()
 
 
+def cull_ignored(km_dict):
+    clean = []
+    for km in km_dict:
+        if str(km['report_id']) not in ignore_kms:
+            clean.append(km)
+    return clean
+
+
 def write_km_dict(km_dict):
     c.executemany('''
                 INSERT OR REPLACE INTO "Killmails"
@@ -303,7 +315,7 @@ if __name__ == "__main__":
                 end_datetime = (start_datetime + relativedelta(months=1))
                 end_date = end_datetime.strftime("%m-%d-%Y")
                 month_json = download_kills(start_date, end_date)
-                write_km_dict(month_json)
+                write_km_dict(cull_ignored(month_json))
                 update_month_status(month)
                 sleep(5) # be nice to mario
             else:
@@ -316,7 +328,7 @@ if __name__ == "__main__":
         end_date = end_datetime.strftime("%m-%d-%Y")
         print(f"[-] downloading month {month}")
         month_json = download_kills(start_date, end_date)
-        write_km_dict(month_json)
+        write_km_dict(cull_ignored(month_json))
         update_month_status(month)
     elif sys.argv[1] == 'day':
         month = get_this_month()
