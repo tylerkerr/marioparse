@@ -48,7 +48,7 @@ headers = {
 
 launch_date = "2020-08-13"
 
-with open('ignore.json') as ignorejson:
+with open(this_path + 'ignore.json') as ignorejson:
     ignore_kms = json.load(ignorejson)
 
 print(ignore_kms)
