@@ -327,10 +327,12 @@ def download_kills(start_date, end_date):
 
 
 def format_msg(km):
-    return f'{km["killer_name"]} killed a {km["victim_ship_type"]} worth {km["isk"]:,} isk'
+    return f'[{km["killer_corp"] if km["killer_corp"] else ""}] {km["killer_name"]} killed {km["victim_name"]}\'s {km["victim_ship_type"]} worth {km["isk"]:,} isk'
 
 
 def send_chat(km, webhook):
+    killer_snug = get(f'https://marioview.honk.click/api/rawsnug/pilot/{km["killer_name"]}').text
+    victim_snug = get(f'https://marioview.honk.click/api/rawsnug/pilot/{km["victim_name"]}').text
     data = {"content": format_msg(km),
             "username": 'Marioview',
             "avatar_url": 'https://marioview.honk.click/static/img/logo-32px.png',
@@ -339,6 +341,10 @@ def send_chat(km, webhook):
                 "image": {
                     "url": km['image_url']
                 }
+            },
+            {
+                "color": 14177041,
+                "description": f"[[km on mobi](https://echoes.mobi/killboard/view/killmail/{km['id']})] [[killer stats ({killer_snug}% snuggly)](https://marioview.honk.click/search?killer_name={km['killer_name']})] [[victim stats ({victim_snug}% snuggly)](https://marioview.honk.click/search?killer_name={km['victim_name']})]"
             }]
             }
     response = requests.post(webhook, json=data)
