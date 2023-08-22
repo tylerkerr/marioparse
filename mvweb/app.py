@@ -6,6 +6,7 @@ from glob import glob
 from hashlib import md5
 from db import db
 from views import routes
+from api import apiroutes
 from filters import register
 import util
 import logging
@@ -73,6 +74,7 @@ def before_request():
 # routes
 
 app.register_blueprint(routes)
+app.register_blueprint(apiroutes)
 
 if __name__ == "__main__":
     app.run()
