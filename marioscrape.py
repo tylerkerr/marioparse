@@ -391,8 +391,7 @@ if __name__ == "__main__":
         update_month_status(month)
     elif sys.argv[1] == 'day':
         month = get_this_month()
-        day = '08-21-2023'
-        # day = get_today_american()
+        day = get_today_american()
         print(f"[-] downloading day {day}")
         day_json = download_kills(day, day)
         write_km_dict(day_json)
