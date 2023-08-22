@@ -10,6 +10,7 @@ from dateutil import parser
 from dateutil.relativedelta import relativedelta
 from time import sleep
 from re import search, sub
+from urllib import parse
 
 
 '''
@@ -344,7 +345,7 @@ def send_chat(km, webhook):
             },
             {
                 "color": 14177041,
-                "description": f"[[km on mobi](https://echoes.mobi/killboard/view/killmail/{km['id']})] [[killer stats ({killer_snug}% snuggly)](https://marioview.honk.click/search?killer_name={km['killer_name']})] [[victim stats ({victim_snug}% snuggly)](https://marioview.honk.click/search?killer_name={km['victim_name']})]"
+                "description": f"[[km on mobi](https://echoes.mobi/killboard/view/killmail/{km['id']})] [[killer stats ⟨{killer_snug}% snuggly⟩]({'https://marioview.honk.click/search?killer_name=' + parse.quote(km['killer_name'])})] [[victim stats ⟨{victim_snug}% snuggly⟩]({'https://marioview.honk.click/search?victim_name=' + parse.quote(km['victim_name'])})]"
             }]
             }
     response = requests.post(webhook, json=data)
@@ -390,7 +391,8 @@ if __name__ == "__main__":
         update_month_status(month)
     elif sys.argv[1] == 'day':
         month = get_this_month()
-        day = get_today_american()
+        day = '08-21-2023'
+        # day = get_today_american()
         print(f"[-] downloading day {day}")
         day_json = download_kills(day, day)
         write_km_dict(day_json)
