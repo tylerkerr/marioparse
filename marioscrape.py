@@ -3,6 +3,7 @@ import os
 import json
 import pandas
 import sys
+import requests
 from requests import get
 from datetime import datetime, timezone
 from dateutil import parser
@@ -51,7 +52,10 @@ launch_date = "2020-08-13"
 with open(this_path + '/ignore.json') as ignorejson:
     ignore_kms = json.load(ignorejson)
 
-print(ignore_kms)
+
+with open(this_path + '/webhooks.json') as webhooksjson:
+    webhooks = json.load(webhooksjson)
+
 
 # database setup
 
@@ -130,8 +134,14 @@ def create_tables(db_name):
     "last_refreshed"    TEXT NOT NULL
     );
     ''')
-    conn.commit()
 
+    c.execute('''
+    CREATE TABLE "Discorded" (
+    "report_id"     INTEGER NOT NULL PRIMARY KEY UNIQUE
+    );
+    ''')
+
+    conn.commit()
 
 
 # date stuff
@@ -246,6 +256,24 @@ def write_km_dict(km_dict):
               ''', km_dict)
     conn.commit()
 
+
+def update_discorded(report_id):
+    c.execute('''
+                 INSERT INTO "Discorded" VALUES (?)
+              ''', (report_id,))
+    conn.commit()
+
+
+def check_if_discorded(report_id):
+    c.execute('''
+                 SELECT report_id from "Discorded" where report_id = ?
+                ''', (report_id,))
+    fetch = c.fetchone()
+    if fetch:
+        return True
+    else:
+        return False
+
 # scraping
 
 
@@ -272,7 +300,8 @@ def download_kills(start_date, end_date):
         if km['killer_corp'] and (len(str(km['killer_corp'])) > 4 or ']' in str(km['killer_corp'])):
             if ']' in str(km['killer_corp']):
                 problem = search(r'\].*', str(km['killer_corp']))[0]
-                km['killer_corp'] = km['killer_corp'][:len(km['killer_corp']) - len(problem)]
+                km['killer_corp'] = km['killer_corp'][:len(
+                    km['killer_corp']) - len(problem)]
             if len(km['killer_corp']) > 4:
                 km['killer_corp'] = km['killer_corp'][:4]
 
@@ -286,14 +315,39 @@ def download_kills(start_date, end_date):
             km['victim_corp'] = fixed
 
         timestamp = int(parser.isoparse(km['date_killed']).timestamp())
-        if timestamp > (nowstamp() + (60 * 60)):    # discard killmails that occur over an hour in the future
+        # discard killmails that occur over 6 hours in the future
+        if timestamp > (nowstamp() + (60 * 60 * 6)):
             continue
-        if km['report_id'] == None or km['report_id'] < 10000 and timestamp > 1640995200:   # test server killmails: id < 10k and timestamp after jan 1 2022
+        # test server killmails: id < 10k and timestamp after jan 1 2022
+        if km['report_id'] == None or km['report_id'] < 10000 and timestamp > 1640995200:
             continue
         km['timestamp'] = timestamp
         stamped_kms.append(km)
     return stamped_kms
 
+
+def format_msg(km):
+    return f'{km["killer_name"]} killed a {km["victim_ship_type"]} worth {km["isk"]:,} isk'
+
+
+def send_chat(km, webhook):
+    data = {"content": format_msg(km),
+            "username": 'Marioview',
+            "avatar_url": 'https://marioview.honk.click/static/img/logo-32px.png',
+            "embeds": [{
+                "color": 14177041,
+                "image": {
+                    "url": km['image_url']
+                }
+            }]
+            }
+    response = requests.post(webhook, json=data)
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        print("[!] HTTP error follows:")
+        print(err)
+        print("[!] failed message:", 'Marioview' + ': ' + data['content'])
 
 
 if __name__ == "__main__":
@@ -304,8 +358,6 @@ if __name__ == "__main__":
 
     all_months = get_all_months()
 
-    # month_json = download_month('2022-09')
-    # write_km_dict(month_json)
     if sys.argv[1] == 'all' or len(sys.argv) == 1:
         for month in get_all_months():
             if not is_month_current(month):
@@ -317,7 +369,7 @@ if __name__ == "__main__":
                 month_json = download_kills(start_date, end_date)
                 write_km_dict(cull_ignored(month_json))
                 update_month_status(month)
-                sleep(5) # be nice to mario
+                sleep(3)  # be nice to mario
             else:
                 print(f"[-] skipping month {month}, already have it")
     elif sys.argv[1] == 'month':
@@ -337,7 +389,16 @@ if __name__ == "__main__":
         day_json = download_kills(day, day)
         write_km_dict(day_json)
         update_month_status(month)
-
+        km_count = 0
+        for km in day_json:
+            if km['isk'] >= 9000000000 and km['total_participants'] == 1 or km['isk'] >= 15000000000:
+                if not check_if_discorded(km['report_id']):
+                    update_discorded(km['report_id'])
+                    print(f'[-] discord blasting {km["report_id"]}')
+                    for hook in webhooks:
+                        send_chat(km, hook)
+                    km_count += 1
+                    sleep(km_count)
 
     c.close()
     conn.close()
