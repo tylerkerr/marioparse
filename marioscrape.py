@@ -328,7 +328,7 @@ def download_kills(start_date, end_date):
 
 
 def format_msg(km):
-    return f'[{km["killer_corp"] if km["killer_corp"] else ""}] {km["killer_name"]} killed {km["victim_name"]}\'s {km["victim_ship_type"]} worth {km["isk"]:,} isk'
+    return f'{"[" + km["killer_corp"] + "]" if km["killer_corp"] else ""} {km["killer_name"]} killed {"[" + km["victim_corp"] + "] " if km["victim_corp"] else ""}{km["victim_name"]}\'s {km["victim_ship_type"]} worth {km["isk"]:,} isk'
 
 
 def send_chat(km, webhook):
