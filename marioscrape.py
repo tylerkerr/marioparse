@@ -186,6 +186,16 @@ def get_today_american():
     return datetime.now(timezone.utc).strftime("%m-%d-%Y")
 
 
+def get_yesterday_american():
+    today = datetime.now(timezone.utc)
+    yesterday = today - relativedelta(days=1)
+    return yesterday.strftime("%m-%d-%Y")
+
+
+def get_hour():
+    return int(datetime.now(timezone.utc).strftime("%H"))
+
+
 def get_today_iso():
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
@@ -332,8 +342,10 @@ def format_msg(km):
 
 
 def send_chat(km, webhook):
-    killer_snug = get(f'https://marioview.honk.click/api/rawsnug/pilot/{km["killer_name"]}').text
-    victim_snug = get(f'https://marioview.honk.click/api/rawsnug/pilot/{km["victim_name"]}').text
+    killer_snug = get(
+        f'https://marioview.honk.click/api/rawsnug/pilot/{km["killer_name"]}').text
+    victim_snug = get(
+        f'https://marioview.honk.click/api/rawsnug/pilot/{km["victim_name"]}').text
     data = {"content": format_msg(km),
             "username": 'Marioview',
             "avatar_url": 'https://marioview.honk.click/static/img/logo-32px.png',
@@ -343,7 +355,7 @@ def send_chat(km, webhook):
                     "url": km['image_url']
                 }
             },
-            {
+        {
                 "color": 14177041,
                 "description": f"[[km on mobi](https://echoes.mobi/killboard/view/killmail/{km['id']})] [[killer stats ⟨{killer_snug}% snuggly⟩]({'https://marioview.honk.click/search?killer_name=' + parse.quote(km['killer_name'])})] [[victim stats ⟨{victim_snug}% snuggly⟩]({'https://marioview.honk.click/search?victim_name=' + parse.quote(km['victim_name'])})]"
             }]
@@ -391,9 +403,13 @@ if __name__ == "__main__":
         update_month_status(month)
     elif sys.argv[1] == 'day':
         month = get_this_month()
-        day = get_today_american()
-        print(f"[-] downloading day {day}")
-        day_json = download_kills(day, day)
+        end_day = get_today_american()
+        if get_hour() < 2:
+            start_day = get_yesterday_american()
+        else:
+            start_day = end_day
+        print(f"[-] downloading day {start_day}")
+        day_json = download_kills(start_day, end_day)
         write_km_dict(day_json)
         update_month_status(month)
         km_count = 0
