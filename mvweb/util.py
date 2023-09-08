@@ -125,6 +125,7 @@ def prep_param(param, fuzzy=False):
         return tuple(param_list)
     if fuzzy:
         param = '%' + param.strip(' ')
+    param = sub('_', '\_', param)
     return sub('\*', '%', param)
 
 
@@ -191,7 +192,7 @@ def gen_select(start, end, params):
                     expand_params.append(param)
                     select.append(f'lower({param}) IN :{param}')
                 else:
-                    select.append(f'{param} LIKE :{param}')
+                    select.append(f"{param} LIKE :{param} ESCAPE '\\'")
 
     select = ' AND '.join(select)
     query = text(' '.join([start, select, end]))
@@ -841,3 +842,19 @@ def map_ship_deaths(ship):
 
 def map_positivity_merge(kills, deaths):
     return {k: kills.get(k, 0) + (deaths.get(k, 0) * -1) for k in set(kills) | set(deaths)}
+
+
+def get_top_corps(number):
+    params = {'number': number}
+    result = db.session.execute(text('''
+                                        SELECT killer_corp, sum(isk)
+                                        FROM Killmails
+                                        GROUP BY killer_corp
+                                        ORDER BY sum(isk) desc
+                                        LIMIT :number
+                                       '''), params).fetchall()
+    corps = []
+    for c in result:
+        if c[0] is not None:
+            corps.append(c[0])
+    return corps
