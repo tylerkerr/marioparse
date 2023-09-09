@@ -396,3 +396,9 @@ nav {
     font-size: 12px;
     display: block;
 }
+
+.formswapbutt {
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+}
