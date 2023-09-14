@@ -414,7 +414,7 @@ if __name__ == "__main__":
         update_month_status(month)
         km_count = 0
         for km in day_json:
-            if km['isk'] >= 9000000000 and km['total_participants'] == 1 or km['isk'] >= 15000000000:
+            if km['isk'] >= 9000000000 and km['total_participants'] == 1 or km['isk'] >= 14000000000:
                 if not check_if_discorded(km['report_id']):
                     update_discorded(km['report_id'])
                     print(f'[-] discord blasting {km["report_id"]}')
