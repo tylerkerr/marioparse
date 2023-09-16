@@ -379,18 +379,15 @@ if __name__ == "__main__":
 
     if sys.argv[1] == 'all' or len(sys.argv) == 1:
         for month in get_all_months():
-            if not is_month_current(month):
-                print(f"[-] downloading month {month}")
-                start_datetime = parser.isoparse(month).replace(day=1)
-                start_date = start_datetime.strftime("%m-%d-%Y")
-                end_datetime = (start_datetime + relativedelta(months=1))
-                end_date = end_datetime.strftime("%m-%d-%Y")
-                month_json = download_kills(start_date, end_date)
-                write_km_dict(cull_ignored(month_json))
-                update_month_status(month)
-                sleep(3)  # be nice to mario
-            else:
-                print(f"[-] skipping month {month}, already have it")
+            print(f"[-] downloading month {month}")
+            start_datetime = parser.isoparse(month).replace(day=1)
+            start_date = start_datetime.strftime("%m-%d-%Y")
+            end_datetime = (start_datetime + relativedelta(months=1))
+            end_date = end_datetime.strftime("%m-%d-%Y")
+            month_json = download_kills(start_date, end_date)
+            write_km_dict(cull_ignored(month_json))
+            update_month_status(month)
+            sleep(3)  # be nice to mario
     elif sys.argv[1] == 'month':
         month = get_this_month()
         start_datetime = parser.isoparse(month).replace(day=1)
