@@ -1,4 +1,5 @@
 import util
+from urllib.parse import quote_plus
 from re import sub
 
 
@@ -18,7 +19,7 @@ def register(jinja_env):
 
 
 def urlify(text):
-    return text.replace('+', '%2B').replace('*', '%2A') if text else None
+    return quote_plus(text)
 
 
 def removeshipsonly(text):
