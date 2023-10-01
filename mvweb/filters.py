@@ -1,10 +1,11 @@
 import util
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, unquote_plus
 from re import sub
 
 
 def register(jinja_env):
     jinja_env.filters['urlify'] = urlify
+    jinja_env.filters['urldecode'] = urldecode
     jinja_env.filters['removeshipsonly'] = removeshipsonly
     jinja_env.filters['get_system_sec'] = get_system_sec
     jinja_env.filters['is_faction'] = is_faction
@@ -20,6 +21,10 @@ def register(jinja_env):
 
 def urlify(text):
     return quote_plus(text)
+
+
+def urldecode(text):
+    return unquote_plus(text)
 
 
 def removeshipsonly(text):

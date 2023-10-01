@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, send_file
 from datetime import datetime, timezone
 from sqlalchemy.sql import text
 from db import db, get_valid_columns
+from urllib.parse import unquote_plus
 import util
 
 
@@ -303,7 +304,7 @@ def checkteam(sheet_id):
 
 @routes.route('/timeline/pilot/<pilot>')
 def timeline_pilot(pilot):
-    return render_template('timeline.html', title="timeline", type="pilot", lookup=pilot)
+    return render_template('timeline.html', title="timeline", type="pilot", lookup=unquote_plus(pilot))
 
 
 @routes.route('/timeline/corp/<corp>')
@@ -318,7 +319,7 @@ def timeline_ship(ship):
 
 @routes.route('/timeline/shipsonly/pilot/<pilot>')
 def timeline_pilot_shipsonly(pilot):
-    return render_template('timeline.html', title="timeline", type="shipsonly/pilot", lookup=pilot)
+    return render_template('timeline.html', title="timeline", type="shipsonly/pilot", lookup=unquote_plus(pilot))
 
 
 @routes.route('/timeline/shipsonly/corp/<corp>')
@@ -360,6 +361,18 @@ def destruction():
     return render_template('destruction.html', title="destruction", months=results)
 
 
+@routes.route('/corphist')
+def corphist():
+    months = util.get_all_months()
+
+    return render_template('corpline.html', title="cool corps", topcorps=util.get_top_corps(20))
+
+
 @routes.route('/heatmap')
 def heatmap():
     return render_template('tsukimap.html', title="heatmap")
+
+
+@routes.route('/corporation/<corp>')
+def corp_page(corp):
+    return render_template('corporation.html', title=f"corporation: {corp.upper()}", corp=corp)
