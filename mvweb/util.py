@@ -139,11 +139,11 @@ def gen_params(request_args):
     params = {
         'report_id': request_args.get('report_id'),
         'killer_corp': prep_param(request_args.get('killer_corp')),
-        'killer_name': prep_param(request_args.get('killer_name'), fuzzy=True),
+        'killer_name': prep_param(request_args.get('killer_name')),
         'minimum_isk': parse_isk_total(request_args.get('isk')),
         'victim_ship_type': prep_param(request_args.get('victim_ship_type'), fuzzy=True),
         'victim_ship_category': prep_param(request_args.get('victim_ship_category')),
-        'victim_name': prep_param(request_args.get('victim_name'), fuzzy=True),
+        'victim_name': prep_param(request_args.get('victim_name')),
         'victim_corp': prep_param(request_args.get('victim_corp')),
         'system': prep_param(request_args.get('system'), fuzzy=True),
         'constellation': prep_param(request_args.get('constellation'), fuzzy=True),
