@@ -342,10 +342,12 @@ def format_msg(km):
 
 
 def send_chat(km, webhook):
+    killer_quoted = parse.quote(parse.quote_plus(km["killer_name"]))
+    victim_quoted = parse.quote(parse.quote_plus(km["victim_name"]))
     killer_snug = get(
-        f'https://marioview.honk.click/api/rawsnug/pilot/{km["killer_name"]}').text
+        f'https://marioview.honk.click/api/rawsnug/pilot/{killer_quoted}').text
     victim_snug = get(
-        f'https://marioview.honk.click/api/rawsnug/pilot/{km["victim_name"]}').text
+        f'https://marioview.honk.click/api/rawsnug/pilot/{victim_quoted}').text
     data = {"content": format_msg(km),
             "username": 'Marioview',
             "avatar_url": 'https://marioview.honk.click/static/img/logo-32px.png',
