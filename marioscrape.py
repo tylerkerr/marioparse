@@ -345,11 +345,33 @@ def quote_char_name(name):
     return parse.quote(sub('/', '%2F', name))
 
 
+def is_notable_kill(km):
+    if km['isk'] >= 9000000000 and km['total_participants'] == 1 or km['isk'] >= 14000000000:
+        return True
+    return False
+
+
+def get_killer_snug(killer_name):
+    return get(f'https://marioview.honk.click/api/rawsnug/pilot/{quote_char_name(killer_name)}').text
+
+
+def get_victim_snug(victim_name):
+    return get(f'https://marioview.honk.click/api/rawsnug/pilot/{quote_char_name(victim_name)}').text
+
+
+def get_snug_change(pre, post):
+    change = round(float(post) - float(pre), 3)
+    if change.is_integer():
+        return int(change)
+    return change
+
+
 def send_chat(km, webhook):
-    killer_snug = get(
-        f'https://marioview.honk.click/api/rawsnug/pilot/{quote_char_name(km["killer_name"])}').text
-    victim_snug = get(
-        f'https://marioview.honk.click/api/rawsnug/pilot/{quote_char_name(km["victim_name"])}').text
+    killer_snug = get_killer_snug(km["killer_name"])
+    killer_snug_change = get_snug_change(killer_snug, km['killer_prekill_snug'])
+    victim_snug = get_victim_snug(km["victim_name"])
+    victim_snug_change = get_snug_change(victim_snug, km['victim_prekill_snug'])
+    
     data = {"content": format_msg(km),
             "username": 'Marioview',
             "avatar_url": 'https://marioview.honk.click/static/img/logo-32px.png',
@@ -361,10 +383,12 @@ def send_chat(km, webhook):
             },
         {
                 "color": 14177041,
-                "description": f"[[km on mobi](https://echoes.mobi/killboard/view/killmail/{km['id']})] [[killer stats ⟨{killer_snug}% snuggly⟩]({'https://marioview.honk.click/search?killer_name=' + parse.quote(km['killer_name'])})] [[victim stats ⟨{victim_snug}% snuggly⟩]({'https://marioview.honk.click/search?victim_name=' + parse.quote(km['victim_name'])})]"
-            }]
-            }
+                "description": f"[[mobi](https://echoes.mobi/killboard/view/killmail/{km['id']})] [[killer ⟨{killer_snug}% snuggly, ↗{killer_snug_change}⟩]({'https://marioview.honk.click/search?killer_name=' + parse.quote(km['killer_name'])})] [[victim ⟨{victim_snug}% snuggly{', ↘' + str(victim_snug_change) if victim_snug != '100' else ''}⟩]({'https://marioview.honk.click/search?victim_name=' + parse.quote(km['victim_name'])})]"
+                }]
+        }
     response = requests.post(webhook, json=data)
+    print(response)
+    print(response.status_code)
     try:
         response.raise_for_status()
     except requests.exceptions.HTTPError as err:
@@ -411,18 +435,29 @@ if __name__ == "__main__":
             start_day = end_day
         print(f"[-] downloading day {start_day}")
         day_json = download_kills(start_day, end_day)
+        day_notables = []
+        for kill in day_json:
+            if is_notable_kill(kill):
+                kill['killer_prekill_snug'] = get_killer_snug(kill['killer_name'])
+                kill['victim_prekill_snug'] = get_victim_snug(kill['victim_name'])
+                day_notables.append(kill)
         write_km_dict(day_json)
         update_month_status(month)
         km_count = 0
-        for km in day_json:
-            if km['isk'] >= 9000000000 and km['total_participants'] == 1 or km['isk'] >= 14000000000:
-                if not check_if_discorded(km['report_id']):
-                    update_discorded(km['report_id'])
-                    print(f'[-] discord blasting {km["report_id"]}')
-                    for hook in webhooks:
-                        send_chat(km, hook)
-                    km_count += 1
-                    sleep(km_count)
+        for km in day_notables:
+            if not check_if_discorded(km['report_id']):
+                update_discorded(km['report_id'])
+                print(f'[-] discord blasting {km["report_id"]}')
+                for hook in webhooks:
+                    send_chat(km, hook)
+                km_count += 1
+                sleep(km_count)
+    elif sys.argv[1] == 'test':
+        print(sys.argv[2])
+        killer_snug = get(
+            f'https://marioview.honk.click/api/rawsnug/pilot/{quote_char_name(sys.argv[2])}').text
+        print("snug:", killer_snug)
+        print("quote:", quote_char_name(sys.argv[2]))
 
     c.close()
     conn.close()
