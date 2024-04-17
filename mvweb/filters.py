@@ -17,6 +17,7 @@ def register(jinja_env):
     jinja_env.filters['alphasort'] = alphasort
     jinja_env.filters['team_corp_list'] = team_corp_list
     jinja_env.filters['other_teams_corp_list'] = other_teams_corp_list
+    jinja_env.filters['date_from_datestring'] = date_from_datestring
 
 
 def urlify(text):
@@ -115,3 +116,8 @@ def other_teams_corp_list(teams, this_team):
                 for corp in teams[team]['alliances'][alliance]:
                     corps.append(corp)
     return ','.join(corps)
+
+
+
+def date_from_datestring(datestring):
+    return datestring.split(' ')[0]

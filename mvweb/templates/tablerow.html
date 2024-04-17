@@ -71,7 +71,7 @@
         {% endif -%}><a href="https://echoes.mobi/killboard/view/killmail/{{ km['id'] }}" target="_blank" class="tablelink">{{ "{:,}".format(km['isk']) }}</a></td>
     <!-- <td>{{ km['victim_total_damage_received'] }}</td> -->
     <!-- <td>{{ km['total_participants'] }}</td> -->
-    <td data-sort="{{ km['timestamp'] }}"><span class="hp-toggle hidden moment" data-group="moments">{{ km['date_killed'] }}</span><span class="hp-toggle" data-group="moments">{{ km['date_killed'] }}</span></td>
+    <td data-sort="{{ km['timestamp'] }}"><a href="/search?date_start={{ km['date_killed']|date_from_datestring }}&date_end={{ km['date_killed']|date_from_datestring }}"><img class='smallicon' src="/static/img/calendar.png"></a> <span class="hp-toggle hidden moment tablelink" data-group="moments">{{ km['date_killed'] }}</span><span class="hp-toggle tablelink" data-group="moments">{{ km['date_killed'] }}</span></td>
     <td><a href="{{ km['image_url'] }}" target="_blank">
         {%- if kms|length < 101 %}
             <img src="{{ km['image_url'] }}" class="km_img_small">
