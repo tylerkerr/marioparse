@@ -338,7 +338,7 @@ def download_kills(start_date, end_date):
 
 
 def format_msg(km):
-    return f'{"[" + km["killer_corp"] + "]" if km["killer_corp"] else ""} {km["killer_name"]} killed {"[" + km["victim_corp"] + "] " if km["victim_corp"] else ""}{km["victim_name"]}\'s {km["victim_ship_type"]} worth {km["isk"]:,} isk'
+    return f'{"[" + str(km["killer_corp"]) + "]" if km["killer_corp"] else ""} {km["killer_name"]} killed {"[" + str(km["victim_corp"]) + "] " if km["victim_corp"] else ""}{km["victim_name"]}\'s {km["victim_ship_type"]} worth {km["isk"]:,} isk'
 
 
 def quote_char_name(name):
@@ -360,7 +360,7 @@ def get_victim_snug(victim_name):
 
 
 def get_snug_change(pre, post):
-    change = round(float(post) - float(pre), 3)
+    change = abs(round(float(post) - float(pre), 3))
     if change.is_integer():
         return int(change)
     return change
@@ -383,7 +383,7 @@ def send_chat(km, webhook):
             },
         {
                 "color": 14177041,
-                "description": f"[[mobi](https://echoes.mobi/killboard/view/killmail/{km['id']})] [[killer ⟨{killer_snug}% snuggly{', ↘' + killer_snug_change if killer_snug != '0' else ''}⟩]({'https://marioview.honk.click/search?killer_name=' + parse.quote(km['killer_name'])})] [[victim ⟨{victim_snug}% snuggly{', ↗' + str(victim_snug_change) if victim_snug != '100' else ''}⟩]({'https://marioview.honk.click/search?victim_name=' + parse.quote(km['victim_name'])})]"
+                "description": f"[[mobi](https://echoes.mobi/killboard/view/killmail/{km['id']})] [[killer ⟨{killer_snug}% snuggly{', ↘' + str(killer_snug_change) if killer_snug != '0' else ''}⟩]({'https://marioview.honk.click/search?killer_name=' + parse.quote(km['killer_name'])})] [[victim ⟨{victim_snug}% snuggly{', ↗' + str(victim_snug_change) if victim_snug != '100' else ''}⟩]({'https://marioview.honk.click/search?victim_name=' + parse.quote(km['victim_name'])})]"
                 }]
         }
     response = requests.post(webhook, json=data)
