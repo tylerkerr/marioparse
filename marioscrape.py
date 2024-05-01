@@ -342,7 +342,7 @@ def format_msg(km):
 
 
 def quote_char_name(name):
-    return parse.quote(sub('/', '%2F', name))
+    return parse.quote(sub('/', '%2F', str(name)))
 
 
 def is_notable_kill(km):
@@ -383,7 +383,7 @@ def send_chat(km, webhook):
             },
         {
                 "color": 14177041,
-                "description": f"[[mobi](https://echoes.mobi/killboard/view/killmail/{km['id']})] [[killer ⟨{killer_snug}% snuggly{', ↘' + str(killer_snug_change) if killer_snug != '0' else ''}⟩]({'https://marioview.honk.click/search?killer_name=' + parse.quote(km['killer_name'])})] [[victim ⟨{victim_snug}% snuggly{', ↗' + str(victim_snug_change) if victim_snug != '100' else ''}⟩]({'https://marioview.honk.click/search?victim_name=' + parse.quote(km['victim_name'])})]"
+                "description": f"[[mobi](https://echoes.mobi/killboard/view/killmail/{km['id']})] [[killer ⟨{killer_snug}% snuggly{', ↘' + str(killer_snug_change) if killer_snug != '0' else ''}⟩]({'https://marioview.honk.click/search?killer_name=' + parse.quote(str(km['killer_name']))})] [[victim ⟨{victim_snug}% snuggly{', ↗' + str(victim_snug_change) if victim_snug != '100' else ''}⟩]({'https://marioview.honk.click/search?victim_name=' + parse.quote(str(km['victim_name']))})]"
                 }]
         }
     response = requests.post(webhook, json=data)
@@ -404,7 +404,8 @@ if __name__ == "__main__":
     print(f"[-] db has {km_count[0]} killmails")
 
     all_months = get_all_months()
-
+    if len(sys.argv) < 2:
+        sys.argv.append('day')
     if sys.argv[1] == 'all' or len(sys.argv) == 1:
         for month in get_all_months():
             print(f"[-] downloading month {month}")

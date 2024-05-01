@@ -273,8 +273,8 @@ snuggly_corp_memo = {}
 
 
 def snuggly_lookup_corp(corp):
-    if corp in snuggly_corp_memo:
-        return snuggly_corp_memo[corp]
+    # if corp in snuggly_corp_memo:
+    #     return snuggly_corp_memo[corp]
     snuggly_corp_memo[corp] = stat_percent_string(snuggly_calc_corp(corp))
     return snuggly_corp_memo[corp]
 
@@ -283,8 +283,8 @@ snuggly_pilot_memo = {}
 
 
 def snuggly_lookup_pilot(pilot):
-    if pilot in snuggly_pilot_memo:
-        return snuggly_pilot_memo[pilot]
+    # if pilot in snuggly_pilot_memo:
+    #     return snuggly_pilot_memo[pilot]
     snuggly_pilot_memo[pilot] = stat_percent_string(snuggly_calc_pilot(pilot))
     return snuggly_pilot_memo[pilot]
 
@@ -858,3 +858,29 @@ def get_top_corps(number):
         if c[0] is not None:
             corps.append(c[0])
     return corps
+
+def round_if_float(number):
+    if type(number) == float:
+        return round(number)
+    else:
+        return number
+
+def get_ship_avg(ship, months_ago):
+    startstamp = (datetime.now(timezone.utc) - relativedelta(months=months_ago)).timestamp()
+    params = {'ship': ship, 'startstamp': startstamp}
+    recent_result = db.session.execute(text('''
+                                        SELECT count(isk), avg(isk)
+                                        FROM Killmails
+                                        WHERE victim_ship_type = :ship
+                                        AND timestamp >= :startstamp
+                                       '''), params).fetchone()
+    full_result = db.session.execute(text('''
+                                        SELECT count(isk), avg(isk)
+                                        FROM Killmails
+                                        WHERE victim_ship_type = :ship
+                                       '''), params).fetchone()
+
+    return {'ship': ship, 'recent_count': recent_result[0], 'recent_avg': round_if_float(recent_result[1]),
+            'total_count': full_result[0], 'full_avg': round_if_float(full_result[1])}
+
+
