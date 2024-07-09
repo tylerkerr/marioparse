@@ -31,12 +31,15 @@
     }
 </style>
 <script>
-    const smallDot = 2
-    const bigDot = 25
-    const smallKm = 1000000
-    const bigKm = 200000000000
     const getKmRadius = isk => {
-        return (bigDot - smallDot) * ((Math.abs(isk) - smallKm) / (bigKm - smallKm)) + smallDot;
+        isk = Math.abs(isk)
+        if (isk <= 1e9) {
+            return 1
+        } else if ( isk <= 100e9) {
+            return 1 + (isk / 1e9) / 10
+        } else {
+            return 11 + (isk / 1e9) / 250
+        }
     }
 
     const widthVal = 800
