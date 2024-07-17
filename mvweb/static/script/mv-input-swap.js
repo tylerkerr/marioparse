@@ -70,4 +70,4 @@ const classwap = function () {
 corpswap();
 nameswap();
 shipswap();
-classswap();
+classwap();

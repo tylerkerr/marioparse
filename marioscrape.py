@@ -346,7 +346,7 @@ def quote_char_name(name):
 
 
 def is_notable_kill(km):
-    if km['isk'] >= 9000000000 and km['total_participants'] == 1 or km['isk'] >= 14000000000:
+    if km['isk'] >= 10000000000: # and km['total_participants'] == 1 or km['isk'] >= 14000000000:
         return True
     return False
 
