@@ -383,7 +383,7 @@ def send_chat(km, webhook):
             },
         {
                 "color": 14177041,
-                "description": f"[[mobi](https://echoes.mobi/killboard/view/killmail/{km['id']})] [[killer ⟨{killer_snug}% snuggly{', ↘' + str(killer_snug_change) if killer_snug != '0' else ''}⟩]({'https://marioview.honk.click/search?killer_name=' + parse.quote(str(km['killer_name']))})] [[victim ⟨{victim_snug}% snuggly{', ↗' + str(victim_snug_change) if victim_snug != '100' else ''}⟩]({'https://marioview.honk.click/search?victim_name=' + parse.quote(str(km['victim_name']))})]"
+                "description": f"[[finalblow](https://finalblow.me/killmail/{km['report_id']})] [[killer ⟨{killer_snug}% snuggly{', ↘' + str(killer_snug_change) if killer_snug != '0' else ''}⟩]({'https://marioview.honk.click/search?killer_name=' + parse.quote(str(km['killer_name']))})] [[victim ⟨{victim_snug}% snuggly{', ↗' + str(victim_snug_change) if victim_snug != '100' else ''}⟩]({'https://marioview.honk.click/search?victim_name=' + parse.quote(str(km['victim_name']))})]"
                 }]
         }
     response = requests.post(webhook, json=data)
