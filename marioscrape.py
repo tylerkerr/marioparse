@@ -247,6 +247,8 @@ def cull_ignored(km_dict):
     for km in km_dict:
         if str(km['report_id']) not in ignore_kms:
             clean.append(km)
+        if km['killer_corp'] == "CRRL":
+            continue
     return clean
 
 
